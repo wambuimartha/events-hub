@@ -51,8 +51,11 @@
             <i class="fa fa-ticket-alt" style="color: #D97706;"></i> My Tickets
           </a>
           {% if user.is_staff %}
-            <a class="nav-contact-pill d-none d-lg-inline-flex" href="{% url 'admin:index' %}">
-              Dashboard
+            <a class="btn-tikiti-auth text-decoration-none" href="{% url 'create_event' %}" style="background: #E11D48; padding: 0.45rem 0.85rem; font-size: 0.82rem;">
+              <i class="fa fa-plus me-1"></i> Upload Event
+            </a>
+            <a class="nav-contact-pill d-none d-lg-inline-flex" href="{% url 'admin:index' %}" target="_blank" title="Open Django Admin">
+              <i class="fa fa-user-shield me-1" style="color: #2563EB;"></i> Admin
             </a>
           {% endif %}
           <form method="post" action="{% url 'logout' %}" class="d-inline m-0">

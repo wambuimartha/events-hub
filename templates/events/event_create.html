@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Upload Campus Event — Organizer Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+      
+      <!-- Breadcrumb Navigation -->
+      <nav class="mb-3 small">
+        <a href="{% url 'event_list' %}" class="text-muted text-decoration-none">
+          <i class="fa fa-arrow-left me-1"></i> Back to Events
+        </a>
+        <span class="mx-2 text-muted">/</span>
+        <span class="fw-semibold text-dark">Upload Event</span>
+      </nav>
+
+      <div class="p-4 p-md-5 bg-white rounded-4 border shadow-sm">
+        
+        <!-- Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom flex-wrap gap-2">
+          <div>
+            <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill small fw-bold" style="background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">
+              <i class="fa fa-user-shield"></i> ORGANIZER PORTAL
+            </div>
+            <h2 class="fw-bold mb-0" style="letter-spacing: -0.03em;">Publish a Campus Event</h2>
+          </div>
+          <a href="{% url 'admin:index' %}" target="_blank" class="btn btn-outline-dark btn-sm fw-bold">
+            <i class="fa fa-external-link-alt me-1"></i> Open Django Admin
+          </a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- SECTION 1: EVENT BASICS -->
+          <h5 class="fw-bold text-dark mb-3">
+            <i class="fa fa-info-circle me-1 text-primary"></i> 1. Event Details
+          </h5>
+
+          <!-- Title -->
+          <div class="mb-3">
+            <label for="{{ form.title.id_for_label }}" class="field-label">Event Title</label>
+            {{ form.title }}
+            {% for error in form.title.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <!-- Venue -->
+            <div class="col-md-7">
+              <label for="{{ form.venue.id_for_label }}" class="field-label">Venue / University Hall</label>
+              {{ form.venue }}
+              {% for error in form.venue.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <!-- Date and Time -->
+            <div class="col-md-5">
+              <label for="{{ form.start_time.id_for_label }}" class="field-label">Date &amp; Start Time (EAT)</label>
+              {{ form.start_time }}
+              {% for error in form.start_time.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="field-label">Event Description &amp; Highlights</label>
+            {{ form.description }}
+            {% for error in form.description.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+            <div class="form-text small text-muted">Include keywords like Hackathon, Bash, Sports, or Gala for category tagging.</div>
+          </div>
+
+          <!-- Banner Cover -->
+          <div class="mb-4">
+            <label for="{{ form.banner.id_for_label }}" class="field-label">Event Banner / Flyer Image</label>
+            <div class="p-3 rounded-3 bg-light border">
+              <input type="file" name="banner" id="{{ form.banner.id_for_label }}" class="form-control" accept="image/*">
+              <div class="form-text small text-muted mt-1">Recommended: Landscape orientation (PNG, JPG, or WebP).</div>
+            </div>
+            {% for error in form.banner.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <hr class="my-4">
+
+          <!-- SECTION 2: TICKET TIERS -->
+          <h5 class="fw-bold text-dark mb-1">
+            <i class="fa fa-ticket-alt me-1 text-danger"></i> 2. Ticket Passes &amp; Pricing
+          </h5>
+          <p class="small text-muted mb-3">Set ticket tiers for your attendees. Enter 0 for free student passes.</p>
+
+          <!-- Primary Pass -->
+          <div class="p-3 rounded-3 border bg-light mb-3">
+            <strong class="d-block small text-uppercase text-dark fw-bold mb-2">Primary Pass (Required)</strong>
+            <div class="row g-2">
+              <div class="col-md-5">
+                <label class="field-label small" for="{{ form.ticket_name.id_for_label }}">Pass Name</label>
+                {{ form.ticket_name }}
+              </div>
+              <div class="col-md-4">
+                <label class="field-label small" for="{{ form.ticket_price.id_for_label }}">Price (KSh)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white small">KSh</span>
+                  {{ form.ticket_price }}
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label class="field-label small" for="{{ form.ticket_quantity.id_for_label }}">Capacity</label>
+                {{ form.ticket_quantity }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Optional VIP Pass -->
+          <div class="p-3 rounded-3 border bg-light mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small text-uppercase text-dark fw-bold">Second Tier (Optional VIP / Front Row)</strong>
+              <span class="badge bg-secondary-subtle text-secondary small">Optional</span>
+            </div>
+            <div class="row g-2">
+              <div class="col-md-5">
+                <label class="field-label small" for="{{ form.vip_ticket_name.id_for_label }}">Tier Name</label>
+                {{ form.vip_ticket_name }}
+              </div>
+              <div class="col-md-4">
+                <label class="field-label small" for="{{ form.vip_ticket_price.id_for_label }}">Price (KSh)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white small">KSh</span>
+                  {{ form.vip_ticket_price }}
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label class="field-label small" for="{{ form.vip_ticket_quantity.id_for_label }}">Capacity</label>
+                {{ form.vip_ticket_quantity }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-flex gap-3 align-items-center">
+            <button type="submit" class="btn-primary-dark px-4 py-2" style="background: #E11D48; border-color: #E11D48;">
+              <i class="fa fa-cloud-upload-alt me-2"></i>Publish Event to Campus
+            </button>
+            <a href="{% url 'event_list' %}" class="btn-outline-dark text-decoration-none">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

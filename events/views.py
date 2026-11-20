@@ -1,6 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from .models import Event
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Event, TicketType
+from .forms import EventCreateForm
 
 
 def event_list(request):
@@ -39,6 +42,49 @@ def event_list(request):
         'selected_category': category
     })
 
+
 def event_detail(request, pk):
     event = get_object_or_404(Event, pk=pk, is_published=True)
     return render(request, 'events/event_detail.html', {'event': event})
+
+
+@login_required
+def create_event(request):
+    """
+    Organizer / Admin portal view to upload new campus events and ticket tiers.
+    """
+    if not request.user.is_staff:
+        messages.error(request, "Staff / Organizer permissions are required to upload events.")
+        return redirect('event_list')
+
+    if request.method == 'POST':
+        form = EventCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.organizer = request.user
+            event.save()
+
+            # Create primary ticket tier
+            TicketType.objects.create(
+                event=event,
+                name=form.cleaned_data['ticket_name'],
+                price=form.cleaned_data['ticket_price'],
+                quantity=form.cleaned_data['ticket_quantity']
+            )
+
+            # Create optional VIP ticket tier
+            vip_name = form.cleaned_data.get('vip_ticket_name', '').strip()
+            if vip_name and form.cleaned_data.get('vip_ticket_price') is not None and form.cleaned_data.get('vip_ticket_quantity'):
+                TicketType.objects.create(
+                    event=event,
+                    name=vip_name,
+                    price=form.cleaned_data['vip_ticket_price'],
+                    quantity=form.cleaned_data['vip_ticket_quantity']
+                )
+
+            messages.success(request, f"Event '{event.title}' was successfully published!")
+            return redirect('event_detail', pk=event.pk)
+    else:
+        form = EventCreateForm()
+
+    return render(request, 'events/event_create.html', {'form': form})
