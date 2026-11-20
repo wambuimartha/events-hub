@@ -223,9 +223,14 @@
 
                 <!-- Quick Actions -->
                 <td class="text-end pe-3">
-                  <a href="{% url 'check_in_ticket' b.code %}" class="btn btn-outline-dark btn-sm py-1 px-2" style="font-size: 0.78rem;" title="Check-in or view QR">
-                    <i class="fa fa-qrcode me-1"></i> Scan
-                  </a>
+                  <div class="d-inline-flex gap-1">
+                    <a href="{% url 'resend_portal_email' b.id %}" class="btn btn-outline-primary btn-sm py-1 px-2" style="font-size: 0.78rem;" title="Resend Ticket Admission Email">
+                      <i class="fa fa-envelope me-1"></i> Resend
+                    </a>
+                    <a href="{% url 'check_in_ticket' b.code %}" class="btn btn-outline-dark btn-sm py-1 px-2" style="font-size: 0.78rem;" title="Check-in or view QR">
+                      <i class="fa fa-qrcode me-1"></i> Scan
+                    </a>
+                  </div>
                 </td>
               </tr>
             {% endfor %}

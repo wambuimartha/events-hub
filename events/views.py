@@ -144,3 +144,18 @@ def organizer_portal(request):
         'selected_status': status_filter,
         'search_query': search_query,
     })
+
+
+@login_required
+def resend_portal_email(request, booking_id):
+    """Staff action to re-dispatch a ticket confirmation email directly from the portal."""
+    if not request.user.is_staff:
+        messages.error(request, "Staff permissions required.")
+        return redirect('organizer_portal')
+
+    booking = get_object_or_404(Booking, pk=booking_id)
+    from bookings.email import send_ticket_confirmation_email
+    send_ticket_confirmation_email(booking)
+    target = booking.attendee_email or booking.user.email
+    messages.success(request, f"Ticket admission pass email re-dispatched to {target}!")
+    return redirect('organizer_portal')
