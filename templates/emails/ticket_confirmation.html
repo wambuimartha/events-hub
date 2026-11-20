@@ -5,34 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Admission Pass — {{ event.title }}</title>
   <style>
+    body, table, td, p, a {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      outline: none;
+      text-decoration: none;
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: #F1F5F9;
-      color: #0F172A;
       margin: 0;
       padding: 0;
-      -webkit-font-smoothing: antialiased;
+      width: 100% !important;
+      background-color: #F3F4F6;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #0F172A;
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #F1F5F9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F1F5F9; padding: 32px 12px;">
+<body style="margin: 0; padding: 0; background-color: #F3F4F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A;">
+
+  <!-- Outer Email Wrapper -->
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; padding: 28px 12px;">
     <tr>
       <td align="center">
-        <!-- Main Email Container -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 580px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);">
-          
-          <!-- Header Banner -->
+
+        <!-- Main Card Container (Max 580px) -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 580px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E5E7EB; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
+
+          <!-- Top Brand Accent Bar (Campus Red & Gold) -->
           <tr>
-            <td style="background: linear-gradient(135deg, #E11D48 0%, #7C3AED 60%, #2563EB 100%); padding: 32px 24px; text-align: center; color: #FFFFFF;">
+            <td style="padding: 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="height: 5px; line-height: 5px; font-size: 5px;">
+                <tr>
+                  <td style="width: 70%; background-color: #E11D48; height: 5px;"></td>
+                  <td style="width: 30%; background-color: #F59E0B; height: 5px;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Official Logo Header -->
+          <tr>
+            <td style="padding: 28px 24px 20px 24px; text-align: center; background-color: #FFFFFF;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td align="center">
-                    <div style="font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: #FFFFFF; margin-bottom: 6px;">
-                      EventHub Campus
-                    </div>
-                    <div style="display: inline-block; background: rgba(255, 255, 255, 0.22); color: #FFFFFF; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 4px 14px; border-radius: 20px;">
-                      Official Admission Pass
+                    <img src="cid:brand_logo" 
+                         width="180" 
+                         alt="EventHub Campus Edition" 
+                         style="display: block; margin: 0 auto; max-width: 180px; height: auto; border: 0;">
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 12px;">
+                    <div style="display: inline-block; background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 4px 14px; border-radius: 9999px;">
+                      Official Campus Admission Pass
                     </div>
                   </td>
                 </tr>
@@ -40,110 +74,163 @@
             </td>
           </tr>
 
-          <!-- Main Body -->
+          <!-- Greeting -->
           <tr>
-            <td style="padding: 32px 28px;">
-              <div style="font-size: 19px; font-weight: 800; color: #0F172A; margin-bottom: 8px;">
+            <td style="padding: 0 28px 20px 28px;">
+              <div style="font-size: 18px; font-weight: 800; color: #0F172A; margin-bottom: 6px;">
                 Hey {{ booking.attendee_name|default:user.first_name|default:user.username }}!
               </div>
-              <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 24px 0;">
-                You're all set! Your registration for <strong>{{ event.title }}</strong> has been confirmed. Below are your official admission details and entry pass.
+              <p style="font-size: 14px; color: #475569; line-height: 1.55; margin: 0;">
+                You're officially registered for <strong>{{ event.title }}</strong>! Present the QR entry pass below at the entrance gate for instant verification.
               </p>
+            </td>
+          </tr>
 
-              <!-- Ticket Card / Pass Stub -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 12px; margin-bottom: 24px;">
+          <!-- TICKET PASS STUB (Authentic Ticket Layout) -->
+          <tr>
+            <td style="padding: 0 28px 24px 28px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #FFFFFF; border: 2px solid #0F172A; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);">
+                
+                <!-- Ticket Header Strip -->
                 <tr>
-                  <td style="padding: 24px;">
-                    <div style="font-size: 18px; font-weight: 800; color: #E11D48; margin-bottom: 16px; line-height: 1.3;">
+                  <td style="background-color: #0F172A; padding: 14px 20px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td align="left">
+                          <span style="color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                            ADMISSION TICKET
+                          </span>
+                        </td>
+                        <td align="right">
+                          <span style="color: #10B981; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                            &#10003; VERIFIED PASS
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Event Details Section -->
+                <tr>
+                  <td style="padding: 22px 22px 16px 22px;">
+                    <div style="font-size: 20px; font-weight: 900; color: #E11D48; line-height: 1.25; margin-bottom: 16px;">
                       {{ event.title }}
                     </div>
 
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px;">
-                      {% if booking.attendee_name %}
                       <tr>
-                        <td style="padding: 9px 0; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Attendee</td>
-                        <td style="padding: 9px 0; color: #0F172A; font-weight: 700; text-align: right; border-bottom: 1px solid #E2E8F0;">{{ booking.attendee_name }}</td>
-                      </tr>
-                      {% endif %}
-                      <tr>
-                        <td style="padding: 9px 0; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Date &amp; Time</td>
-                        <td style="padding: 9px 0; color: #0F172A; font-weight: 700; text-align: right; border-bottom: 1px solid #E2E8F0;">{{ event.start_time|date:"D, d M Y · H:i" }} EAT</td>
+                        <td style="padding: 7px 0; color: #64748B; font-weight: 600; width: 32%;">Attendee</td>
+                        <td style="padding: 7px 0; color: #0F172A; font-weight: 700; text-align: right;">{{ booking.attendee_name|default:user.username }}</td>
                       </tr>
                       <tr>
-                        <td style="padding: 9px 0; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Venue</td>
-                        <td style="padding: 9px 0; color: #0F172A; font-weight: 700; text-align: right; border-bottom: 1px solid #E2E8F0;">{{ event.venue }}</td>
+                        <td style="padding: 7px 0; color: #64748B; font-weight: 600;">Date &amp; Time</td>
+                        <td style="padding: 7px 0; color: #0F172A; font-weight: 700; text-align: right;">{{ event.start_time|date:"D, d M Y · H:i" }} EAT</td>
                       </tr>
                       <tr>
-                        <td style="padding: 9px 0; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Ticket Tier</td>
-                        <td style="padding: 9px 0; color: #0F172A; font-weight: 700; text-align: right; border-bottom: 1px solid #E2E8F0;">{{ ticket.name }} &times; {{ booking.quantity }}</td>
+                        <td style="padding: 7px 0; color: #64748B; font-weight: 600;">Venue</td>
+                        <td style="padding: 7px 0; color: #0F172A; font-weight: 700; text-align: right;">{{ event.venue }}</td>
                       </tr>
                       <tr>
-                        <td style="padding: 9px 0; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Amount</td>
-                        <td style="padding: 9px 0; color: #0F172A; font-weight: 800; text-align: right; border-bottom: 1px solid #E2E8F0;">
+                        <td style="padding: 7px 0; color: #64748B; font-weight: 600;">Ticket Pass</td>
+                        <td style="padding: 7px 0; color: #0F172A; font-weight: 700; text-align: right;">{{ ticket.name }} &times; {{ booking.quantity }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 7px 0; color: #64748B; font-weight: 600;">Amount</td>
+                        <td style="padding: 7px 0; color: #0F172A; font-weight: 800; text-align: right;">
                           {% if booking.total == 0 %}
-                            <span style="color: #059669; font-weight: 800;">FREE PASS</span>
+                            <span style="color: #059669; font-weight: 800; background-color: #ECFDF5; padding: 2px 8px; border-radius: 4px; font-size: 12px;">FREE PASS</span>
                           {% else %}
                             KSh {{ booking.total|floatformat:0 }}
                           {% endif %}
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding: 9px 0; color: #64748B; font-weight: 600;">Reference / Receipt</td>
-                        <td style="padding: 9px 0; color: #059669; font-weight: 700; font-family: monospace; text-align: right;">{{ booking.mpesa_receipt|default:'CONFIRMED' }}</td>
+                        <td style="padding: 7px 0; color: #64748B; font-weight: 600;">Ref / Receipt</td>
+                        <td style="padding: 7px 0; color: #059669; font-weight: 700; font-family: monospace; text-align: right;">{{ booking.mpesa_receipt|default:'CAMPUS-PASS' }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Perforated Tear Line with Decorative Circles -->
+                <tr>
+                  <td style="padding: 0 16px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="border-top: 2px dashed #CBD5E1; height: 1px; font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- QR CODE CENTER SECTION -->
+                <tr>
+                  <td style="padding: 20px 22px 24px 22px; text-align: center; background-color: #FAFAF9;">
+                    <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+                      <tr>
+                        <td align="center" style="background-color: #FFFFFF; padding: 12px; border-radius: 12px; border: 1.5px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                          <img src="cid:ticket_qr" 
+                               width="160" 
+                               height="160" 
+                               alt="Official Ticket QR Pass" 
+                               style="display: block; width: 160px; height: 160px; margin: 0 auto; border: 0;">
+                        </td>
                       </tr>
                     </table>
 
-                    <div style="text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px dashed #CBD5E1;">
-                      <div style="font-family: monospace; font-size: 12px; background: #E2E8F0; padding: 6px 12px; border-radius: 6px; display: inline-block; color: #334155;">
-                        Ticket Code: {{ booking.code }}
-                      </div>
+                    <div style="margin-top: 14px;">
+                      <span style="font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace; font-size: 12px; color: #334155; background-color: #E2E8F0; padding: 5px 12px; border-radius: 6px; display: inline-block; letter-spacing: 0.5px; font-weight: 700;">
+                        {{ booking.code }}
+                      </span>
+                    </div>
+
+                    <div style="font-size: 12px; color: #64748B; margin-top: 8px; font-weight: 500;">
+                      Scan at gate for instant student check-in
                     </div>
                   </td>
                 </tr>
-              </table>
 
-              <!-- QR Attachment Callout -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; margin-bottom: 24px;">
-                <tr>
-                  <td style="padding: 16px 20px; text-align: center;">
-                    <div style="font-size: 14px; color: #1E40AF; font-weight: 700; margin-bottom: 4px;">
-                      Your Entry QR Pass is attached to this email!
-                    </div>
-                    <div style="font-size: 12px; color: #3B82F6; line-height: 1.5;">
-                      Present the attached image or show this email on your phone at the entrance gate for instant verification.
-                    </div>
-                  </td>
-                </tr>
               </table>
+            </td>
+          </tr>
 
-              <!-- View Pass Button -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+          <!-- CTA: View Pass in Wallet Button -->
+          <tr>
+            <td style="padding: 0 28px 28px 28px; text-align: center;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td align="center">
-                    <a href="{{ site_url }}/bookings/my-tickets/" target="_blank" style="display: inline-block; background-color: #0F172A; color: #FFFFFF; font-size: 13px; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 8px;">
-                      Open Pass in Tickets Wallet &rarr;
+                    <a href="{{ site_url }}/bookings/my-tickets/" 
+                       target="_blank" 
+                       style="display: inline-block; background-color: #E11D48; color: #FFFFFF; font-size: 14px; font-weight: 800; text-decoration: none; padding: 13px 32px; border-radius: 8px; box-shadow: 0 3px 10px rgba(225, 29, 72, 0.28);">
+                      Open in My Tickets Wallet &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="font-size: 12px; color: #64748B; text-align: center; margin: 0;">
-                If you have questions about this event or need assistance, reply to this email or reach out to <a href="mailto:info@eventhub.co.ke" style="color: #2563EB; font-weight: 600; text-decoration: underline;">info@eventhub.co.ke</a>.
+              <!-- Help Hotline info -->
+              <p style="font-size: 12px; color: #64748B; line-height: 1.6; margin: 20px 0 0 0;">
+                Questions or issues? WhatsApp / Call <strong style="color: #0F172A;">+254 707 991 991</strong> or email <a href="mailto:info@eventhub.co.ke" style="color: #2563EB; text-decoration: none; font-weight: 600;">info@eventhub.co.ke</a>.
               </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #0F172A; padding: 24px; text-align: center; color: #94A3B8; font-size: 12px; line-height: 1.6;">
-              <strong style="color: #FFFFFF;">EventHub Campus Edition</strong> &bull; Nairobi, Kenya<br>
-              Safaricom Daraja Secured &bull; Official Student Ticketing Platform
+            <td style="background-color: #0F172A; padding: 22px 24px; text-align: center; color: #94A3B8; font-size: 12px; line-height: 1.6;">
+              <strong style="color: #FFFFFF; font-size: 13px;">EventHub Campus Edition</strong><br>
+              eMobilis Innovation Hub &bull; Nairobi, Kenya<br>
+              <span style="font-size: 11px; color: #64748B;">Safaricom Daraja Secured &bull; Official Campus Ticketing Platform</span>
             </td>
           </tr>
 
         </table>
+
       </td>
     </tr>
   </table>
+
 </body>
 </html>

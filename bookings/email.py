@@ -2,6 +2,7 @@ import io
 import logging
 import threading
 import qrcode
+from email.mime.image import MIMEImage
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -12,15 +13,15 @@ logger = logging.getLogger(__name__)
 
 def _send_ticket_email_worker(booking_id, recipient):
     """
-    Background worker thread function to render template, generate QR pass,
-    and dispatch SMTP email without delaying the HTTP response or triggering Gunicorn timeouts.
+    Background worker thread function to render template, generate inline QR pass,
+    attach the official campus brand logo, and dispatch SMTP email without delaying the HTTP response.
     """
     try:
         from bookings.models import Booking
         booking = Booking.objects.select_related('ticket_type__event', 'user').get(pk=booking_id)
         event = booking.ticket_type.event
         ticket = booking.ticket_type
-        subject = f"Your Admission Ticket: {event.title} [#{str(booking.code)[:8]}]"
+        subject = f"Your Admission Pass: {event.title} [#{str(booking.code)[:8]}]"
 
         context = {
             'booking': booking,
@@ -42,7 +43,23 @@ def _send_ticket_email_worker(booking_id, recipient):
         )
         email.attach_alternative(html_content, "text/html")
 
-        # Generate QR Code in memory and attach
+        # 1. Attach Official Brand Logo Inline (cid:brand_logo)
+        logo_path = settings.BASE_DIR / 'static' / 'images' / 'email_logo.png'
+        if not logo_path.exists():
+            logo_path = settings.BASE_DIR / 'static' / 'images' / 'logo.png'
+
+        if logo_path.exists():
+            try:
+                with open(logo_path, 'rb') as f:
+                    logo_bytes = f.read()
+                logo_mime = MIMEImage(logo_bytes, _subtype='png')
+                logo_mime.add_header('Content-ID', '<brand_logo>')
+                logo_mime.add_header('Content-Disposition', 'inline', filename='eventhub_logo.png')
+                email.attach(logo_mime)
+            except Exception as e:
+                logger.warning(f"Could not attach inline logo: {e}")
+
+        # 2. Generate QR Code Pass and attach Inline (cid:ticket_qr)
         try:
             qr = qrcode.QRCode(box_size=8, border=2)
             qr.add_data(str(booking.code))
@@ -53,8 +70,10 @@ def _send_ticket_email_worker(booking_id, recipient):
             img.save(buf, format='PNG')
             qr_bytes = buf.getvalue()
 
-            filename = f"ticket-pass-{str(booking.code)[:8]}.png"
-            email.attach(filename, qr_bytes, "image/png")
+            qr_mime = MIMEImage(qr_bytes, _subtype='png')
+            qr_mime.add_header('Content-ID', '<ticket_qr>')
+            qr_mime.add_header('Content-Disposition', 'inline', filename=f"ticket-pass-{str(booking.code)[:8]}.png")
+            email.attach(qr_mime)
         except Exception as qr_err:
             logger.error(f"Failed to generate QR attachment for booking {booking.id}: {qr_err}")
 
@@ -80,4 +99,5 @@ def send_ticket_confirmation_email(booking):
     )
     thread.start()
     return True
+
 
