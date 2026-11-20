@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}My Tickets — EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+    <div>
+      <div class="mb-2">
+        <span class="badge px-3 py-2 fw-bold" style="background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 0.78rem;">
+          <i class="fa fa-graduation-cap me-1"></i> Student Passbook
+        </span>
+      </div>
+      <h2 class="fw-bold mb-0" style="letter-spacing: -0.03em;">My Tickets</h2>
+    </div>
+    <a href="{% url 'event_list' %}" class="btn-outline-dark text-decoration-none">
+      <i class="fa fa-compass me-1"></i> Browse more events
+    </a>
+  </div>
+
+  {% if bookings %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      {% for booking in bookings %}
+        <div class="col">
+          <div class="wallet-card">
+            
+            <!-- Card Header -->
+            <div class="wallet-card-header">
+              <span class="badge-status-clean {% if booking.status == 'paid' %}status-paid{% elif booking.status == 'cancelled' %}status-cancelled{% else %}status-pending{% endif %}">
+                ● {{ booking.status|upper }}
+              </span>
+              <span class="small text-muted font-monospace">{{ booking.created_at|date:"d M Y · H:i" }}</span>
+            </div>
+
+            <!-- Card Body -->
+            <div class="wallet-card-body">
+              <h4 class="wallet-event-title">{{ booking.ticket_type.event.title }}</h4>
+
+              <table class="wallet-meta-table">
+                {% if booking.attendee_name %}
+                <tr>
+                  <td class="meta-key">Attendee:</td>
+                  <td class="meta-val fw-semibold">{{ booking.attendee_name }}</td>
+                </tr>
+                {% endif %}
+                {% if booking.attendee_email %}
+                <tr>
+                  <td class="meta-key">Email:</td>
+                  <td class="meta-val">{{ booking.attendee_email }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                  <td class="meta-key">Tier:</td>
+                  <td class="meta-val">{{ booking.ticket_type.name }} &times; {{ booking.quantity }}</td>
+                </tr>
+                <tr>
+                  <td class="meta-key">Date:</td>
+                  <td class="meta-val">{{ booking.ticket_type.event.start_time|date:"D, d M Y · H:i" }}</td>
+                </tr>
+                <tr>
+                  <td class="meta-key">Venue:</td>
+                  <td class="meta-val">{{ booking.ticket_type.event.venue }}</td>
+                </tr>
+                <tr>
+                  <td class="meta-key">Total:</td>
+                  <td class="meta-val fw-bold text-dark">
+                    {% if booking.total == 0 %}
+                      <span class="badge-free-entry">FREE</span>
+                    {% else %}
+                      KSh {{ booking.total|floatformat:0 }}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% if booking.mpesa_receipt %}
+                  <tr>
+                    <td class="meta-key">Reference:</td>
+                    <td class="meta-val text-success fw-bold font-monospace">{{ booking.mpesa_receipt }}</td>
+                  </tr>
+                {% endif %}
+              </table>
+
+              <div class="mt-2">
+                <span class="wallet-uuid-badge">UUID: {{ booking.code }}</span>
+              </div>
+            </div>
+
+            <!-- Bottom QR Verification Frame / Payment Action -->
+            <div class="wallet-qr-section">
+              {% if booking.status == 'paid' %}
+                <div class="qr-image-frame">
+                  <img src="{% url 'ticket_qr' booking.code %}" alt="QR Admission Pass">
+                </div>
+                <div class="small text-muted mb-2">Scan at the venue entrance for verification</div>
+
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  {% if booking.checked_in %}
+                    <span class="badge-status-clean status-paid">
+                      <i class="fa fa-check-circle me-1"></i> Admitted / Checked In
+                    </span>
+                  {% else %}
+                    <span class="badge-status-clean status-cancelled">Not Admitted</span>
+                    {% if user.is_staff or booking.ticket_type.event.organizer == user %}
+                      <a href="{% url 'check_in_ticket' booking.code %}" class="btn-outline-dark text-decoration-none" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                        <i class="fa fa-qrcode me-1"></i> Verify Entry
+                      </a>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              {% else %}
+                <div class="py-2">
+                  <div class="small text-muted mb-3">This reservation is pending payment. Pay via M-Pesa to unlock your digital ticket pass.</div>
+                  <a href="{% url 'booking_checkout' booking.id %}" class="btn-primary-dark text-decoration-none px-4 py-2" style="background: #00B140; border-color: #00B140;">
+                    <i class="fa fa-mobile-alt me-2"></i>Pay KSh {{ booking.total|floatformat:0 }} via M-Pesa
+                  </a>
+                </div>
+              {% endif %}
+
+              {% if user.is_staff and booking.status != 'paid' %}
+                <div class="mt-3 pt-3 border-top">
+                  <a href="{% url 'mark_as_paid' booking.id %}" class="btn-outline-dark d-block text-decoration-none text-center" style="font-size: 0.78rem;">
+                    <i class="fa fa-bolt me-1 text-warning"></i> Staff Dev: Force Mark as Paid
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="content-block-section text-center py-5">
+      <i class="fa fa-ticket-alt fs-1 text-muted mb-3 d-block"></i>
+      <h5 class="fw-bold mb-1">Your passbook is empty</h5>
+      <p class="text-muted small mb-3">You have not booked any event passes yet.</p>
+      <a href="{% url 'event_list' %}" class="btn-primary-dark text-decoration-none">
+        Find events to attend
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

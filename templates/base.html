@@ -1,0 +1,144 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}EventHub Campus — Student Events &amp; Tickets{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/eventhub.css' %}" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ══════════ TIKITI STYLE NAVBAR ══════════ -->
+<header class="tikiti-navbar">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between gap-3">
+
+      <!-- Logo -->
+      <a href="{% url 'event_list' %}" class="tikiti-brand" title="EventHub Campus Edition">
+        <img src="{% static 'images/logo.png' %}" alt="EventHub Campus Edition" class="nav-brand-logo">
+      </a>
+
+      <!-- Center Search Bar (like Tikiti.co.ke) -->
+      <div class="nav-search-wrapper d-none d-md-block flex-grow-1 mx-3" style="max-width: 480px;">
+        <form method="get" action="{% url 'event_list' %}" class="m-0">
+          <i class="fa fa-search nav-search-icon"></i>
+          <input type="text" 
+                 name="q" 
+                 class="nav-search-input" 
+                 placeholder="Search campus events, hackathons, bashes, venues..." 
+                 value="{{ query|default:'' }}">
+        </form>
+      </div>
+
+      <!-- Right Contacts & Account -->
+      <div class="d-flex align-items-center gap-2">
+        <a href="tel:+254707991991" class="nav-contact-pill d-none d-xl-inline-flex">
+          <i class="fa fa-phone small" style="color: #0891B2;"></i> +254 707 991 991
+        </a>
+        <a href="mailto:info@eventhub.co.ke" class="nav-contact-pill d-none d-xl-inline-flex">
+          <i class="fa fa-envelope small" style="color: #E11D48;"></i> info@eventhub.co.ke
+        </a>
+
+        {% if user.is_authenticated %}
+          <a class="nav-contact-pill" href="{% url 'my_bookings' %}">
+            <i class="fa fa-ticket-alt" style="color: #D97706;"></i> My Tickets
+          </a>
+          {% if user.is_staff %}
+            <a class="nav-contact-pill d-none d-lg-inline-flex" href="{% url 'admin:index' %}">
+              Dashboard
+            </a>
+          {% endif %}
+          <form method="post" action="{% url 'logout' %}" class="d-inline m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn-tikiti-auth" style="background:#111827; padding: 0.45rem 1rem;">
+              Logout
+            </button>
+          </form>
+        {% else %}
+          <a class="nav-contact-pill" href="{% url 'login' %}">Log in</a>
+          <a class="btn-tikiti-auth" href="{% url 'signup' %}">Sign up free</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ NOTIFICATIONS ══════════ -->
+{% if messages %}
+  <div class="container pt-3">
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show border py-2 px-3 small rounded-3" role="alert">
+        {{ m }}
+        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ══════════ TIKITI FOOTER ══════════ -->
+<footer class="tikiti-footer">
+  <div class="container">
+    <div class="row g-4 justify-content-between">
+      <div class="col-lg-5 col-md-6">
+        <div class="mb-3">
+          <a href="{% url 'event_list' %}">
+            <img src="{% static 'images/logo.png' %}" alt="EventHub Campus Edition" style="height: 52px; width: auto; object-fit: contain;">
+          </a>
+        </div>
+        <p class="small text-secondary mb-3" style="line-height: 1.6;">
+          Kenya's #1 campus event and student pass ticketing platform. Hackathons, bashes, varsity derbies, and career summits with instant M-Pesa &amp; free student passes.
+        </p>
+        <div class="d-flex gap-3 small text-secondary">
+          <span><i class="fa fa-phone me-1"></i> +254 707 991 991</span>
+          <span><i class="fa fa-envelope me-1"></i> info@eventhub.co.ke</span>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-6">
+        <h6 class="text-white fw-bold mb-3 small text-uppercase">Events</h6>
+        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+          <li><a href="{% url 'event_list' %}"><i class="fa fa-compass me-1" style="color: #F59E0B;"></i> All Campus Events</a></li>
+          <li><a href="{% url 'event_list' %}?category=Free"><i class="fa fa-ticket-alt me-1" style="color: #10B981;"></i> Free Student Passes</a></li>
+          <li><a href="{% url 'event_list' %}?category=Tech"><i class="fa fa-laptop-code me-1" style="color: #2563EB;"></i> Hackathons &amp; AI</a></li>
+          <li><a href="{% url 'event_list' %}?category=Parties"><i class="fa fa-music me-1" style="color: #E11D48;"></i> Freshers &amp; Bashes</a></li>
+          <li><a href="{% url 'event_list' %}?category=Sports"><i class="fa fa-trophy me-1" style="color: #D97706;"></i> Varsity Sports</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-6">
+        <h6 class="text-white fw-bold mb-3 small text-uppercase">Help &amp; Account</h6>
+        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'my_bookings' %}"><i class="fa fa-wallet me-1" style="color: #D97706;"></i> My Tickets Wallet</a></li>
+            <li><a href="{% url 'admin:index' %}"><i class="fa fa-user-shield me-1" style="color: #2563EB;"></i> Organizer Portal</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}"><i class="fa fa-sign-in-alt me-1" style="color: #E11D48;"></i> Sign In</a></li>
+            <li><a href="{% url 'signup' %}"><i class="fa fa-user-plus me-1" style="color: #10B981;"></i> Create Account</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center pt-4 mt-4 border-top border-secondary small text-secondary">
+      <div>&copy; 2026 EventHub Kenya. All rights reserved.</div>
+      <div>Nairobi, Kenya</div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

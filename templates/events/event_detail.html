@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }} — EventHub Campus{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumbs -->
+  <nav class="mb-3 small">
+    <a href="{% url 'event_list' %}" class="text-muted text-decoration-none">
+      <i class="fa fa-arrow-left me-1"></i> Discover Events
+    </a>
+    <span class="mx-2 text-muted">/</span>
+    <span class="fw-semibold text-dark">{{ event.title|truncatechars:40 }}</span>
+  </nav>
+
+  <!-- Banner Cover -->
+  {% if event.banner %}
+    <div class="rounded-4 overflow-hidden mb-4 border shadow-sm" style="height: 380px; width: 100%;">
+      <img src="{{ event.banner_url }}" alt="{{ event.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <!-- Left: Event Information -->
+    <div class="col-lg-7">
+      <div class="p-4 bg-white rounded-4 border shadow-sm mb-4">
+        <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill small fw-bold" style="background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">
+          <i class="fa fa-calendar-alt"></i> {{ event.start_time|date:"l, d F Y · H:i" }} EAT
+        </div>
+        
+        <h1 class="fw-bold mb-3" style="letter-spacing: -0.03em;">{{ event.title }}</h1>
+        
+        <div class="d-flex align-items-center gap-3 text-secondary small mb-4 pb-3 border-bottom flex-wrap">
+          <div><i class="fa fa-map-marker-alt me-1" style="color: #E11D48;"></i> {{ event.venue }}</div>
+          <div><i class="fa fa-user-circle me-1" style="color: #2563EB;"></i> Organized by <strong>{{ event.organizer.username }}</strong></div>
+        </div>
+
+        <h5 class="fw-bold mb-2">About This Event</h5>
+        <p class="text-secondary" style="line-height: 1.8; white-space: pre-line;">{{ event.description }}</p>
+      </div>
+
+      <!-- Venue & Timing Card -->
+      <div class="p-4 bg-white rounded-4 border shadow-sm">
+        <h5 class="fw-bold mb-3">Venue &amp; Entry Information</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 bg-light border">
+              <span class="small text-muted fw-bold text-uppercase d-block mb-1">
+                <i class="fa fa-clock me-1 text-primary"></i> Gate Entry
+              </span>
+              <div class="fw-bold">{{ event.start_time|date:"l, d M Y" }}</div>
+              <div class="small text-muted">Doors open at {{ event.start_time|date:"H:i" }} EAT</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 bg-light border">
+              <span class="small text-muted fw-bold text-uppercase d-block mb-1">
+                <i class="fa fa-map-pin me-1 text-danger"></i> Location
+              </span>
+              <div class="fw-bold">{{ event.venue }}</div>
+              <div class="small text-muted">Admission verified via M-Pesa QR code</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Sticky Ticket Desk & Registration -->
+    <div class="col-lg-5">
+      <div class="p-4 bg-white rounded-4 border shadow-sm sticky-top" style="top: 90px;">
+        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+          <h5 class="fw-bold mb-0">Select Tickets &amp; Register</h5>
+          <span class="badge bg-light text-dark border small">{{ event.ticket_types.count }} pass tier{{ event.ticket_types.count|pluralize }}</span>
+        </div>
+
+        {% if not user.is_authenticated %}
+          <!-- Unauthenticated Quick Auth Notice -->
+          <div class="p-3 mb-4 rounded-3 border bg-light">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <i class="fa fa-user-lock text-danger"></i>
+              <strong class="small text-dark">Sign in or Register to Book</strong>
+            </div>
+            <p class="small text-muted mb-3" style="font-size: 0.8rem; line-height: 1.4;">
+              An account is required so we can deliver your digital QR admission pass and send updates.
+            </p>
+
+            <!-- Continue with Google -->
+            <a href="{% url 'google_login' %}?next={{ request.path }}" class="btn-google-auth w-100 mb-2">
+              <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              <span>Continue with Google</span>
+            </a>
+
+            <div class="d-flex gap-2">
+              <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-dark btn-sm flex-grow-1 text-center" style="border-radius: 6px; font-weight: 700; font-size: 0.8rem;">
+                <i class="fa fa-sign-in-alt me-1"></i> Sign In
+              </a>
+              <a href="{% url 'signup' %}?next={{ request.path }}" class="btn-tikiti-auth btn-sm flex-grow-1 text-center" style="font-size: 0.8rem; padding: 0.35rem 0.5rem;">
+                <i class="fa fa-user-plus me-1"></i> Create Account
+              </a>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if event.ticket_types.all %}
+          {% for ticket in event.ticket_types.all %}
+            <div class="p-3 rounded-3 border mb-3 {% if ticket.remaining == 0 %}bg-light opacity-75{% endif %}">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h6 class="fw-bold mb-0 text-dark">{{ ticket.name }}</h6>
+                  <span class="small text-muted">
+                    {% if ticket.remaining > 0 %}
+                      {{ ticket.remaining }} passes remaining
+                    {% else %}
+                      <span class="text-danger fw-bold">Sold Out</span>
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="fw-bold fs-5 text-dark">
+                  {% if ticket.price == 0 %}
+                    <span class="badge-free-entry">FREE</span>
+                  {% else %}
+                    KSh {{ ticket.price|floatformat:0 }}
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if ticket.remaining > 0 %}
+                {% if user.is_authenticated %}
+                  <form method="post" action="{% url 'book_ticket' ticket.id %}" class="mt-3 pt-2 border-top">
+                    {% csrf_token %}
+                    
+                    <!-- Choose Quantity -->
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-muted mb-1 d-flex justify-content-between">
+                        <span>Number of Passes</span>
+                        <span class="text-dark">Max: {{ ticket.remaining }}</span>
+                      </label>
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted"><i class="fa fa-ticket-alt"></i></span>
+                        <input type="number" 
+                               name="quantity" 
+                               class="form-control text-center fw-bold" 
+                               value="1" 
+                               min="1" 
+                               max="{{ ticket.remaining }}" 
+                               required>
+                      </div>
+                    </div>
+
+                    <!-- Attendee Name -->
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold text-muted mb-1">Attendee Full Name</label>
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted"><i class="fa fa-user"></i></span>
+                        <input type="text" 
+                               name="attendee_name" 
+                               class="form-control" 
+                               placeholder="e.g. Martha Wanjiku" 
+                               value="{{ user.get_full_name|default:user.username }}" 
+                               required>
+                      </div>
+                    </div>
+
+                    <!-- Attendee Email -->
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold text-muted mb-1">Email (for Ticket &amp; QR Pass)</label>
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted"><i class="fa fa-envelope"></i></span>
+                        <input type="email" 
+                               name="attendee_email" 
+                               class="form-control" 
+                               placeholder="e.g. student@gmail.com" 
+                               value="{{ user.email }}" 
+                               required>
+                      </div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-muted mb-1">M-Pesa Phone Number</label>
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted">+254</span>
+                        <input type="tel" 
+                               name="phone_number" 
+                               class="form-control" 
+                               placeholder="712345678" 
+                               required>
+                      </div>
+                    </div>
+
+                    <button type="submit" class="btn-tikiti-auth w-100 py-2 justify-content-center text-center" {% if ticket.price == 0 %}style="background: #059669;"{% endif %}>
+                      {% if ticket.price == 0 %}
+                        <i class="fa fa-ticket-alt me-1"></i> Claim Free Pass
+                      {% else %}
+                        <i class="fa fa-mobile-alt me-1"></i> Continue to M-Pesa Payment
+                      {% endif %}
+                    </button>
+                  </form>
+                {% else %}
+                  <div class="mt-2 text-center">
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-dark btn-sm w-100" style="border-radius: 6px; font-weight: 700;">
+                      <i class="fa fa-lock me-1"></i> Sign in to select this pass
+                    </a>
+                  </div>
+                {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-4 text-muted small">
+            Ticket registration has not opened yet.
+          </div>
+        {% endif %}
+
+        <div class="text-center mt-3 pt-3 border-top small text-muted">
+          <i class="fa fa-shield-alt text-success me-1"></i> Official EventHub Campus Verified Pass
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

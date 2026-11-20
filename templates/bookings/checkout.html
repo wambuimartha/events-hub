@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}Checkout — {{ booking.ticket_type.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <span class="text-uppercase small fw-bold text-muted letter-spacing-1">Order Checkout</span>
+          <h2 class="fw-bold mb-0">Confirm &amp; Pay</h2>
+        </div>
+        <a href="{% url 'event_detail' booking.ticket_type.event.id %}" class="btn-outline-dark text-decoration-none small">
+          &larr; Cancel
+        </a>
+      </div>
+
+      <div class="row g-4">
+        <!-- Order Summary -->
+        <div class="col-md-6">
+          <div class="content-block-section h-100">
+            <div class="block-label">Event Summary</div>
+            
+            {% if booking.ticket_type.event.banner %}
+              <div class="rounded-2 overflow-hidden mb-3 border" style="height: 140px;">
+                <img src="{{ booking.ticket_type.event.banner_url }}" alt="{{ booking.ticket_type.event.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+            {% endif %}
+
+            <h5 class="fw-bold text-dark mb-2">{{ booking.ticket_type.event.title }}</h5>
+
+            <div class="small text-muted mb-2">
+              <i class="fa fa-calendar me-2"></i>{{ booking.ticket_type.event.start_time|date:"D, d M Y · H:i" }} EAT
+            </div>
+            <div class="small text-muted mb-3">
+              <i class="fa fa-map-marker-alt me-2"></i>{{ booking.ticket_type.event.venue }}
+            </div>
+
+            <hr class="my-3">
+
+            {% if booking.attendee_name %}
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Attendee:</span>
+              <span class="fw-semibold text-dark">{{ booking.attendee_name }}</span>
+            </div>
+            {% endif %}
+            {% if booking.attendee_email %}
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Delivery Email:</span>
+              <span class="text-dark">{{ booking.attendee_email }}</span>
+            </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Pass Tier:</span>
+              <span class="fw-semibold text-dark">{{ booking.ticket_type.name }}</span>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Quantity:</span>
+              <span class="fw-semibold text-dark">{{ booking.quantity }} ticket(s)</span>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mb-2">
+              <span>Price per ticket:</span>
+              <span>KSh {{ booking.ticket_type.price|floatformat:0 }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+              <span class="fw-bold">Amount Due:</span>
+              <span class="fw-bold fs-4 text-dark">KSh {{ booking.total|floatformat:0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- M-Pesa Payment Card -->
+        <div class="col-md-6">
+          <div class="content-block-section h-100 d-flex flex-direction-column justify-content-between">
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="block-label mb-0">Payment Method</div>
+                <span class="badge bg-success px-2 py-1 small fw-bold">M-Pesa Express</span>
+              </div>
+
+              <div class="p-3 rounded-3 bg-light border mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <div style="width: 12px; height: 12px; background: #00B140; border-radius: 50%;"></div>
+                  <strong class="text-dark small">Lipa na M-Pesa Online (STK Push)</strong>
+                </div>
+                <p class="small text-muted mb-0" style="line-height: 1.5;">
+                  Enter your Safaricom phone number. A secure PIN prompt will appear automatically on your handset.
+                </p>
+              </div>
+
+              <form method="post" action="{% url 'mpesa_stk_push' booking.id %}" id="mpesaForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label class="field-label" for="phoneInput">M-Pesa Phone Number</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted small fw-semibold">+254</span>
+                    <input type="tel" 
+                           name="phone_number" 
+                           id="phoneInput" 
+                           class="form-control border-start-0" 
+                           placeholder="712345678" 
+                           value="{{ booking.phone_number|default:'' }}" 
+                           required>
+                  </div>
+                  <div class="form-text small text-muted">Format: 0712345678 or 712345678</div>
+                </div>
+
+                <button type="submit" class="btn-primary-dark w-100 justify-content-center py-2" id="payBtn" style="background: #00B140; border-color: #00B140;">
+                  <i class="fa fa-mobile-alt me-2"></i>Pay KSh {{ booking.total|floatformat:0 }} via M-Pesa
+                </button>
+              </form>
+
+              <!-- Live Polling Notice -->
+              <div id="pollingNotice" class="text-center mt-3 d-none">
+                <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                <span class="small text-muted">Waiting for M-Pesa confirmation...</span>
+              </div>
+            </div>
+
+            <!-- Sandbox Testing Helper -->
+            <div class="mt-4 pt-3 border-top text-center">
+              <span class="small text-muted d-block mb-2">Developing or testing without real funds?</span>
+              <a href="{% url 'simulate_mpesa_payment' booking.id %}" class="btn-outline-dark text-decoration-none d-block small py-1">
+                <i class="fa fa-bolt me-1 text-warning"></i> Simulate Instant M-Pesa Confirmation
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Check payment status every 3 seconds if an STK push was triggered
+const bookingId = {{ booking.id }};
+const statusUrl = "{% url 'check_payment_status' booking.id %}";
+const myTicketsUrl = "{% url 'my_bookings' %}";
+
+{% if booking.checkout_request_id %}
+document.getElementById('pollingNotice')?.classList.remove('d-none');
+const pollInterval = setInterval(() => {
+  fetch(statusUrl)
+    .then(res => res.json())
+    .then(data => {
+      if (data.is_paid) {
+        clearInterval(pollInterval);
+        window.location.href = myTicketsUrl;
+      }
+    })
+    .catch(err => console.log('Polling err', err));
+}, 3000);
+{% endif %}
+</script>
+{% endblock %}

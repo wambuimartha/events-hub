@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Campus Events &amp; Passes — EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+
+  <!-- ══════ TIKITI CAMPUS HERO CARD ══════ -->
+  <section class="tikiti-hero-card">
+    <div class="tikiti-hero-badge">
+      <i class="fa fa-graduation-cap"></i> CAMPUS EDITION &bull; NAIROBI UNIVERSITIES
+    </div>
+    
+    <h1 class="tikiti-hero-heading">
+      Discover campus bashes,<br>
+      hackathons &amp; <span class="tikiti-hero-highlight">experiences</span>.
+    </h1>
+
+    <p class="tikiti-hero-subtitle">
+      Your student passport to Kenyan universities. Free hackathon passes, fresher bashes, and varsity derbies with instant M-Pesa delivery.
+    </p>
+  </section>
+
+  <!-- ══════ DISCOVER EVENTS SECTION ══════ -->
+  <div class="section-heading-bar d-flex align-items-end justify-content-between flex-wrap gap-2">
+    <div>
+      <h2 class="section-main-title">Campus Happenings</h2>
+      <div class="section-counter">{{ events.count }} event{{ events.count|pluralize }} happening this semester</div>
+    </div>
+  </div>
+
+  <!-- Category Filter Pills (Real Icons) -->
+  <div class="category-filter-strip">
+    <a href="{% url 'event_list' %}" class="cat-filter-btn cat-filter-all {% if not selected_category %}active{% endif %}">
+      <i class="fa fa-layer-group"></i> All Campus Events
+    </a>
+    <a href="{% url 'event_list' %}?category=Free" class="cat-filter-btn cat-filter-free {% if selected_category == 'Free' %}active{% endif %}">
+      <i class="fa fa-ticket-alt"></i> Free Passes
+    </a>
+    <a href="{% url 'event_list' %}?category=Tech" class="cat-filter-btn cat-filter-tech {% if selected_category == 'Tech' %}active{% endif %}">
+      <i class="fa fa-laptop-code"></i> Tech &amp; AI
+    </a>
+    <a href="{% url 'event_list' %}?category=Parties" class="cat-filter-btn cat-filter-parties {% if selected_category == 'Parties' %}active{% endif %}">
+      <i class="fa fa-music"></i> Freshers &amp; Bashes
+    </a>
+    <a href="{% url 'event_list' %}?category=Sports" class="cat-filter-btn cat-filter-sports {% if selected_category == 'Sports' %}active{% endif %}">
+      <i class="fa fa-trophy"></i> Varsity Sports
+    </a>
+    <a href="{% url 'event_list' %}?category=Career" class="cat-filter-btn cat-filter-career {% if selected_category == 'Career' %}active{% endif %}">
+      <i class="fa fa-briefcase"></i> Career &amp; Talks
+    </a>
+    <a href="{% url 'event_list' %}?category=Arts" class="cat-filter-btn cat-filter-arts {% if selected_category == 'Arts' %}active{% endif %}">
+      <i class="fa fa-star"></i> Gala &amp; Runway
+    </a>
+  </div>
+
+  <!-- Event Grid -->
+  {% if events %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for e in events %}
+      <div class="col">
+        <a href="{% url 'event_detail' e.pk %}" class="tikiti-event-card">
+
+          <!-- Cover Image + Date Pill -->
+          <div class="card-cover-frame">
+            {% if e.banner %}
+              <img src="{{ e.banner_url }}" alt="{{ e.title }}">
+            {% endif %}
+
+            <div class="date-pill-float">
+              <span class="date-pill-month">{{ e.start_time|date:"M" }}</span>
+              <span class="date-pill-day">{{ e.start_time|date:"d" }}</span>
+            </div>
+          </div>
+
+          <!-- Event Details -->
+          <div class="card-details-box">
+            <h3 class="card-event-heading">{{ e.title }}</h3>
+
+            <div class="card-meta-line">
+              <i class="fa fa-map-marker-alt"></i>
+              <span>{{ e.venue|truncatechars:38 }}</span>
+            </div>
+
+            <div class="card-meta-line">
+              <i class="fa fa-clock"></i>
+              <span>{{ e.start_time|date:"D, d M Y · H:i" }} EAT</span>
+            </div>
+          </div>
+
+          <!-- Bottom Price & Ticket CTA -->
+          <div class="card-bottom-bar">
+            <div class="card-price-tag">
+              {% if e.ticket_types.all %}
+                {% with cheapest=e.ticket_types.all|first %}
+                  {% if cheapest.price == 0 %}
+                    <span class="badge-free-entry">FREE PASS</span>
+                  {% else %}
+                    <span>From</span> KSh {{ cheapest.price|floatformat:0 }}
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                <span class="badge-free-entry">FREE ENTRY</span>
+              {% endif %}
+            </div>
+            <span class="btn-card-ticket">
+              Get Pass <i class="fa fa-arrow-right"></i>
+            </span>
+          </div>
+
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="p-5 text-center my-4 rounded-4 bg-light border">
+      <i class="fa fa-calendar-times fs-1 text-muted mb-3 d-block"></i>
+      <h4 class="fw-bold mb-1">No matching campus events found</h4>
+      <p class="text-muted small mb-3">Try clearing search filters or browse all categories.</p>
+      <a href="{% url 'event_list' %}" class="btn-tikiti-auth text-decoration-none">
+        Show All Events
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
