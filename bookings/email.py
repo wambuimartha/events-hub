@@ -81,8 +81,10 @@ def _send_ticket_email_worker(booking_id, recipient):
             logger.error(f"Failed to generate QR attachment for booking {booking.id}: {qr_err}")
 
         email.send(fail_silently=False)
+        print(f"[EMAIL SUCCESS] Ticket pass emailed to {recipient} for booking {booking.id}", flush=True)
         logger.info(f"Ticket confirmation email sent to {recipient} for booking {booking.id}")
     except Exception as e:
+        print(f"[EMAIL ERROR] Failed to send ticket pass to {recipient}: {e}", flush=True)
         logger.error(f"Failed to dispatch ticket confirmation email for booking {booking_id}: {e}")
 
 

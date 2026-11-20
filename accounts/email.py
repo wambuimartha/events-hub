@@ -52,8 +52,10 @@ def _send_welcome_worker(user_id, recipient):
                 logger.warning(f"Could not attach inline logo in welcome email: {e}")
 
         email.send(fail_silently=False)
+        print(f"[WELCOME EMAIL SUCCESS] Sent to {recipient} (User {user_id})", flush=True)
         logger.info(f"Welcome email successfully sent to {recipient} (User {user_id})")
     except Exception as e:
+        print(f"[WELCOME EMAIL ERROR] Failed to send welcome email to {recipient}: {e}", flush=True)
         logger.error(f"[EMAIL ERROR] Failed to send welcome email to {recipient}: {e}", exc_info=True)
 
 

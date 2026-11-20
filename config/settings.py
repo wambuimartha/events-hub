@@ -158,21 +158,21 @@ AUTHENTICATION_BACKENDS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email configuration
-SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+SITE_URL = config('SITE_URL', default='https://events-hub-rygr.onrender.com')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=5, cast=int)
-_raw_from = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>').strip()
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='wammarz15@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='yfbojuqedrozjhgd')
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
+_raw_from = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <wammarz15@gmail.com>').strip()
 if not _raw_from:
-    _raw_from = 'EventHub Campus <noreply@eventhub.co.ke>'
+    _raw_from = 'EventHub Campus <wammarz15@gmail.com>'
 _cleaned_from = _raw_from.strip('"').strip("'")
 if '@' not in _cleaned_from and EMAIL_HOST_USER:
     DEFAULT_FROM_EMAIL = f"{_cleaned_from} <{EMAIL_HOST_USER}>"
 elif '@' not in _cleaned_from:
-    DEFAULT_FROM_EMAIL = f"{_cleaned_from} <noreply@eventhub.co.ke>"
+    DEFAULT_FROM_EMAIL = f"{_cleaned_from} <wammarz15@gmail.com>"
 else:
     DEFAULT_FROM_EMAIL = _cleaned_from
