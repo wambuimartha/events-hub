@@ -37,18 +37,14 @@ def format_phone_number(phone: str) -> str:
 def get_mpesa_access_token():
     """Generate OAuth access token from Safaricom Daraja API."""
     url = f"{BASE_URL}/oauth/v1/generate?grant_type=client_credentials"
-    try:
-        response = requests.get(
-            url,
-            auth=HTTPBasicAuth(MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET),
-            timeout=30
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data.get('access_token')
-    except Exception as e:
-        logger.error(f"Failed to fetch M-Pesa access token: {e}")
-        raise
+    response = requests.get(
+        url,
+        auth=HTTPBasicAuth(MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET),
+        timeout=10
+    )
+    response.raise_for_status()
+    data = response.json()
+    return data.get('access_token')
 
 
 def generate_mpesa_password():
@@ -61,32 +57,32 @@ def generate_mpesa_password():
 
 def initiate_stk_push(phone_number: str, amount: int, account_reference: str, transaction_desc: str = 'EventHub Ticket'):
     """Initiate Lipa na M-Pesa Online STK Push request."""
-    formatted_phone = format_phone_number(phone_number)
-    token = get_mpesa_access_token()
-    timestamp, password = generate_mpesa_password()
-
-    url = f"{BASE_URL}/mpesa/stkpush/v1/processrequest"
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json',
-    }
-
-    payload = {
-        "BusinessShortCode": MPESA_SHORTCODE,
-        "Password": password,
-        "Timestamp": timestamp,
-        "TransactionType": "CustomerPayBillOnline",
-        "Amount": int(amount),
-        "PartyA": formatted_phone,
-        "PartyB": MPESA_SHORTCODE,
-        "PhoneNumber": formatted_phone,
-        "CallBackURL": MPESA_CALLBACK_URL,
-        "AccountReference": str(account_reference)[:12],
-        "TransactionDesc": str(transaction_desc)[:13],
-    }
-
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        formatted_phone = format_phone_number(phone_number)
+        token = get_mpesa_access_token()
+        timestamp, password = generate_mpesa_password()
+
+        url = f"{BASE_URL}/mpesa/stkpush/v1/processrequest"
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+
+        payload = {
+            "BusinessShortCode": MPESA_SHORTCODE,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": int(amount),
+            "PartyA": formatted_phone,
+            "PartyB": MPESA_SHORTCODE,
+            "PhoneNumber": formatted_phone,
+            "CallBackURL": MPESA_CALLBACK_URL,
+            "AccountReference": str(account_reference)[:12],
+            "TransactionDesc": str(transaction_desc)[:13],
+        }
+
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
         result = response.json()
         logger.info(f"M-Pesa STK Push response: {result}")
         return {

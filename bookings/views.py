@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 
 @login_required
 @require_POST
-@transaction.atomic
 def book_ticket(request, ticket_id):
-    ticket = get_object_or_404(TicketType.objects.select_for_update(), pk=ticket_id)
+    ticket = get_object_or_404(TicketType, pk=ticket_id)
     try:
         qty = int(request.POST.get('quantity', 1))
     except (ValueError, TypeError):
@@ -36,31 +35,37 @@ def book_ticket(request, ticket_id):
     attendee_email = request.POST.get('attendee_email', '').strip() or request.user.email
     phone = request.POST.get('phone_number', '').strip()
 
-    booking = Booking.objects.create(
-        user=request.user,
-        ticket_type=ticket,
-        quantity=qty,
-        total=ticket.price * qty,
-        attendee_name=attendee_name,
-        attendee_email=attendee_email,
-        phone_number=phone,
-        status='pending'
-    )
+    try:
+        with transaction.atomic():
+            booking = Booking.objects.create(
+                user=request.user,
+                ticket_type=ticket,
+                quantity=qty,
+                total=ticket.price * qty,
+                attendee_name=attendee_name,
+                attendee_email=attendee_email,
+                phone_number=phone,
+                status='pending'
+            )
 
-    # Free Campus Event Handling (skip M-Pesa, confirm instantly)
-    if booking.total == 0:
-        booking.status = 'paid'
-        booking.mpesa_receipt = 'CAMPUS-FREE'
-        booking.save()
-        send_ticket_confirmation_email(booking)
-        target_email = booking.attendee_email or request.user.email
-        messages.success(
-            request, 
-            f"You're officially registered for {ticket.event.title}! Your digital ticket and QR pass have been sent to {target_email}."
-        )
-        return redirect('my_bookings')
+            # Free Campus Event Handling (skip M-Pesa, confirm instantly)
+            if booking.total == 0:
+                booking.status = 'paid'
+                booking.mpesa_receipt = 'CAMPUS-FREE'
+                booking.save()
+                send_ticket_confirmation_email(booking)
+                target_email = booking.attendee_email or request.user.email
+                messages.success(
+                    request, 
+                    f"You're officially registered for {ticket.event.title}! Your digital ticket and QR pass have been sent to {target_email}."
+                )
+                return redirect('my_bookings')
 
-    return redirect('booking_checkout', booking_id=booking.id)
+        return redirect('booking_checkout', booking_id=booking.id)
+    except Exception as e:
+        logger.error(f"Error booking ticket {ticket_id} for user {request.user.id}: {e}", exc_info=True)
+        messages.error(request, "Unable to complete reservation right now. Please try again.")
+        return redirect('event_detail', pk=ticket.event.pk)
 
 
 @login_required

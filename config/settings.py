@@ -67,7 +67,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DB_ENGINE = config('DB_ENGINE', default='django.db.backends.mysql')
+DB_ENGINE = config('DB_ENGINE', default='django.db.backends.sqlite3')
 if DB_ENGINE == 'django.db.backends.sqlite3':
     DATABASES = {
         'default': {
@@ -151,4 +151,5 @@ EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=5, cast=int)
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>')
