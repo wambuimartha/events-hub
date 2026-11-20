@@ -96,20 +96,37 @@ def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=N
                 "html": html_content,
             }
             attachments = []
+            inline_images = {}
             if qr_bytes:
+                b64_qr = base64.b64encode(qr_bytes).decode('utf-8')
                 attachments.append({
                     "name": "ticket-pass-qr.png",
-                    "content": base64.b64encode(qr_bytes).decode('utf-8'),
+                    "content": b64_qr,
                     "mimeType": "image/png"
                 })
+                inline_images["ticket_qr"] = {
+                    "content": b64_qr,
+                    "mimeType": "image/png"
+                }
             if logo_bytes:
+                b64_logo = base64.b64encode(logo_bytes).decode('utf-8')
                 attachments.append({
                     "name": "eventhub-logo.png",
-                    "content": base64.b64encode(logo_bytes).decode('utf-8'),
+                    "content": b64_logo,
                     "mimeType": "image/png"
                 })
-            if attachments:
-                payload["attachments"] = attachments
+                inline_images["brand_logo"] = {
+                    "content": b64_logo,
+                    "mimeType": "image/png"
+                }
+
+            payload = {
+                "to": recipient,
+                "subject": subject,
+                "html": html_content,
+                "inlineImages": inline_images,
+                "attachments": attachments,
+            }
 
             resp = requests.post(
                 gmail_webapp_url,
