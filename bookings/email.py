@@ -61,8 +61,11 @@ def _send_ticket_email_worker(booking_id, recipient):
 
         # 2. Generate QR Code Pass and attach Inline (cid:ticket_qr)
         try:
+            site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
+            checkin_url = f"{site_url}/bookings/tickets/{booking.code}/check-in/"
+
             qr = qrcode.QRCode(box_size=8, border=2)
-            qr.add_data(str(booking.code))
+            qr.add_data(checkin_url)
             qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
 

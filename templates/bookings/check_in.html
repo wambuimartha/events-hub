@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Gate Verification — {{ booking.ticket_type.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+      <div class="p-4 p-md-5 bg-white rounded-4 border shadow-sm text-center">
+
+        {% if status_code == 'admitted' %}
+          <!-- SUCCESS: NEWLY ADMITTED -->
+          <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background: #ECFDF5; border: 3px solid #10B981;">
+              <i class="fa fa-check text-success fs-1"></i>
+            </div>
+          </div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill fw-bold text-uppercase small mb-2">
+            Admitted &bull; Valid Pass
+          </span>
+          <h2 class="fw-bold mb-3 text-dark">Welcome to {{ booking.ticket_type.event.title }}</h2>
+
+        {% elif status_code == 'already_used' %}
+          <!-- WARNING: ALREADY CHECKED IN -->
+          <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background: #FFFBEB; border: 3px solid #F59E0B;">
+              <i class="fa fa-exclamation-triangle text-warning fs-1"></i>
+            </div>
+          </div>
+          <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1 rounded-pill fw-bold text-uppercase small mb-2">
+            Warning &bull; Already Scanned
+          </span>
+          <h2 class="fw-bold mb-3 text-dark">Ticket Already Used</h2>
+          <p class="text-secondary small mb-4">
+            This admission pass was already checked in earlier. Do not allow duplicate entry with shared screenshots.
+          </p>
+
+        {% elif status_code == 'unpaid' %}
+          <!-- ERROR: UNPAID TICKET -->
+          <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background: #FFF1F2; border: 3px solid #E11D48;">
+              <i class="fa fa-times text-danger fs-1"></i>
+            </div>
+          </div>
+          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill fw-bold text-uppercase small mb-2">
+            Invalid &bull; Unpaid
+          </span>
+          <h2 class="fw-bold mb-3 text-dark">Payment Incomplete</h2>
+          <p class="text-secondary small mb-4">
+            This pass has status <strong>{{ booking.status }}</strong> and cannot be admitted until payment is completed.
+          </p>
+
+        {% else %}
+          <!-- GENERIC VERIFICATION / NON-STAFF -->
+          <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background: #EFF6FF; border: 3px solid #2563EB;">
+              <i class="fa fa-id-badge text-primary fs-1"></i>
+            </div>
+          </div>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill fw-bold text-uppercase small mb-2">
+            Official Pass Verified
+          </span>
+          <h2 class="fw-bold mb-3 text-dark">{{ booking.ticket_type.event.title }}</h2>
+        {% endif %}
+
+        <!-- TICKET VERIFICATION CARD -->
+        <div class="p-3 bg-light rounded-3 border text-start mb-4" style="font-size: 0.9rem;">
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted fw-semibold">Attendee Name:</span>
+            <strong class="text-dark">{{ booking.attendee_name|default:booking.user.username }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted fw-semibold">Email:</span>
+            <span class="text-dark">{{ booking.attendee_email|default:booking.user.email }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted fw-semibold">Pass Tier:</span>
+            <span class="fw-bold text-dark">{{ booking.ticket_type.name }} &times; {{ booking.quantity }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted fw-semibold">Event Venue:</span>
+            <span class="text-dark">{{ booking.ticket_type.event.venue }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted fw-semibold">Reference:</span>
+            <span class="font-monospace fw-bold text-success">{{ booking.mpesa_receipt|default:'CAMPUS-PASS' }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2">
+            <span class="text-muted fw-semibold">Ticket Code:</span>
+            <span class="font-monospace small text-muted">{{ booking.code }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="{% url 'event_detail' booking.ticket_type.event.id %}" class="btn btn-outline-dark btn-sm fw-bold">
+            <i class="fa fa-arrow-left me-1"></i> Event Details
+          </a>
+          {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}" class="btn btn-dark btn-sm fw-bold">
+              <i class="fa fa-user-shield me-1"></i> Admin Portal
+            </a>
+          {% endif %}
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

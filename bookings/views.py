@@ -195,8 +195,11 @@ def ticket_qr(request, code):
             booking.ticket_type.event.organizer != request.user):
         raise Http404("Ticket not found.")
 
+    site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
+    checkin_url = f"{site_url}/bookings/tickets/{booking.code}/check-in/"
+
     qr = qrcode.QRCode(box_size=6, border=2)
-    qr.add_data(str(booking.code))
+    qr.add_data(checkin_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
 
@@ -220,19 +223,24 @@ def mark_as_paid(request, booking_id):
     return redirect('my_bookings')
 
 
-@login_required
 def check_in_ticket(request, code):
+    """
+    Gate check-in endpoint: accessed when gate staff or usher scans the QR code.
+    Validates payment and marks attendee as checked in, preventing double admissions.
+    """
     booking = get_object_or_404(Booking, code=code)
-    if not (request.user.is_staff or booking.ticket_type.event.organizer == request.user):
-        messages.error(request, 'Only the event organizer or staff can check in tickets.')
-        return redirect('my_bookings')
 
     if booking.status != 'paid':
-        messages.warning(request, f'Cannot check in an unpaid booking ({booking.status}).')
+        status_code = 'unpaid'
     elif booking.checked_in:
-        messages.info(request, f'Ticket {booking.code} is already checked in.')
+        status_code = 'already_used'
     else:
+        # First time scan: mark admitted
         booking.checked_in = True
         booking.save()
-        messages.success(request, f'Ticket {booking.code} has been successfully checked in!')
-    return redirect('my_bookings')
+        status_code = 'admitted'
+
+    return render(request, 'bookings/check_in.html', {
+        'booking': booking,
+        'status_code': status_code,
+    })
