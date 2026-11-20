@@ -178,5 +178,6 @@ else:
     DEFAULT_FROM_EMAIL = _cleaned_from
 
 # HTTPS Email Providers (Bypasses Render Free Tier SMTP port blocking)
+GMAIL_WEBAPP_URL = config('GMAIL_WEBAPP_URL', default='')
 BREVO_API_KEY = config('BREVO_API_KEY', default='')
 RESEND_API_KEY = config('RESEND_API_KEY', default='')

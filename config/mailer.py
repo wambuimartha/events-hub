@@ -17,8 +17,44 @@ def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=N
     """
     brevo_api_key = getattr(settings, 'BREVO_API_KEY', '').strip()
     resend_api_key = getattr(settings, 'RESEND_API_KEY', '').strip()
+    gmail_webapp_url = getattr(settings, 'GMAIL_WEBAPP_URL', '').strip()
     sender_email = getattr(settings, 'EMAIL_HOST_USER', 'wammarz15@gmail.com')
     sender_name = "EventHub Campus"
+
+    # =========================================================================
+    # OPTION 0: Google Apps Script Web App (HTTPS Port 443 — 100% Free, Native Gmail)
+    # =========================================================================
+    if gmail_webapp_url:
+        try:
+            payload = {
+                "to": recipient,
+                "subject": subject,
+                "html": html_content,
+            }
+            attachments = []
+            if qr_bytes:
+                attachments.append({
+                    "name": "ticket-pass-qr.png",
+                    "content": base64.b64encode(qr_bytes).decode('utf-8'),
+                    "mimeType": "image/png"
+                })
+            if logo_bytes:
+                attachments.append({
+                    "name": "eventhub-logo.png",
+                    "content": base64.b64encode(logo_bytes).decode('utf-8'),
+                    "mimeType": "image/png"
+                })
+            if attachments:
+                payload["attachments"] = attachments
+
+            resp = requests.post(gmail_webapp_url, json=payload, timeout=15, allow_redirects=True)
+            if resp.status_code in (200, 302):
+                print(f"[GMAIL WEBAPP SUCCESS] Ticket email sent to {recipient}", flush=True)
+                return True
+            else:
+                print(f"[GMAIL WEBAPP ERROR] Status {resp.status_code}: {resp.text}", flush=True)
+        except Exception as e:
+            print(f"[GMAIL WEBAPP EXCEPTION] {e}", flush=True)
 
     # =========================================================================
     # OPTION 1: Brevo HTTPS REST API (Port 443 — Free 300 emails/day to any inbox)
