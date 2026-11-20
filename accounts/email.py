@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 def _send_welcome_worker(user_id, recipient):
     try:
         from django.contrib.auth.models import User
+        from bookings.mpesa import format_phone_number
         user = User.objects.select_related('profile').get(pk=user_id)
-        phone = getattr(user, 'profile', None).phone_number if hasattr(user, 'profile') else ''
+        raw_phone = getattr(user, 'profile', None).phone_number if hasattr(user, 'profile') else ''
+        phone_display = f"+{format_phone_number(raw_phone)}" if raw_phone else ''
 
         subject = f"Welcome to EventHub Campus, {user.first_name or user.username}! 🎓"
         context = {
             'user': user,
-            'phone': phone,
+            'phone': phone_display,
             'site_url': getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000').rstrip('/'),
         }
 

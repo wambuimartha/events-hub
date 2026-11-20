@@ -165,4 +165,8 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=5, cast=int)
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>')
+_raw_from = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>')
+if '@' not in _raw_from and EMAIL_HOST_USER:
+    DEFAULT_FROM_EMAIL = f"{_raw_from.strip('\"')} <{EMAIL_HOST_USER}>"
+else:
+    DEFAULT_FROM_EMAIL = _raw_from
