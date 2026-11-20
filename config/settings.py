@@ -13,8 +13,21 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost,testserver,.vercel.app,.onrender.com', cast=Csv())
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://*.vercel.app,https://*.onrender.com,http://127.0.0.1,http://localhost', cast=Csv())
+# Proxy SSL Header (Critical for Render and cloud reverse proxies)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+raw_allowed = config('ALLOWED_HOSTS', default='127.0.0.1,localhost,testserver,.vercel.app,.onrender.com', cast=Csv())
+ALLOWED_HOSTS = list(set(list(raw_allowed) + ['.onrender.com', 'events-hub-rygr.onrender.com', '.vercel.app', 'localhost', '127.0.0.1']))
+
+raw_csrf = config('CSRF_TRUSTED_ORIGINS', default='https://*.vercel.app,https://*.onrender.com', cast=Csv())
+CSRF_TRUSTED_ORIGINS = list(set(list(raw_csrf) + [
+    'https://*.onrender.com',
+    'https://events-hub-rygr.onrender.com',
+    'https://*.vercel.app',
+    'http://127.0.0.1',
+    'http://localhost',
+]))
 
 
 # Application definition
