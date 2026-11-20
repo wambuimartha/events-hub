@@ -3,66 +3,65 @@
 
 {% block content %}
 <div class="auth-stage">
-  <div class="auth-panel" style="max-width: 460px;">
+  <div class="auth-panel" style="max-width: 480px;">
     
     <!-- Google Logo Header -->
     <div class="text-center mb-3">
-      <svg viewBox="0 0 24 24" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 24 24" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
       </svg>
       <h3 class="fw-bold mt-2 mb-1" style="color: #1F2937;">Sign in with Google</h3>
-      <p class="small text-muted mb-0">Choose your Google or university email to continue to EventHub Campus.</p>
+      <p class="small text-muted mb-0">Direct Google Account integration for EventHub Campus.</p>
     </div>
 
-    <!-- Quick 1-Click Fast Connect Option -->
-    <div class="p-3 rounded-3 border mb-3 bg-light">
-      <span class="small fw-bold text-uppercase text-muted d-block mb-2" style="font-size: 0.7rem; letter-spacing: 0.05em;">Quick Connect Account</span>
-      
+    {% if missing_credentials %}
+      <!-- Notice: How to connect real Google OAuth -->
+      <div class="p-3 mb-3 rounded-3 border" style="background: #EFF6FF; border-color: #BFDBFE;">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <i class="fa fa-info-circle text-primary"></i>
+          <strong class="small text-primary">Real Google OAuth2 Setup</strong>
+        </div>
+        <p class="small text-dark mb-2" style="font-size: 0.8rem; line-height: 1.4;">
+          To allow users to sign in with their actual Google Accounts on <code>accounts.google.com</code>, add your Google Client credentials to <code>.env</code>:
+        </p>
+        <div class="p-2 rounded bg-white border font-monospace small mb-2" style="font-size: 0.72rem; word-break: break-all;">
+          <strong>Authorized Redirect URI:</strong><br>
+          <span class="text-danger">{{ callback_uri }}</span>
+        </div>
+        <ol class="small text-muted mb-0 ps-3" style="font-size: 0.76rem; line-height: 1.5;">
+          <li>Visit <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="fw-bold text-primary">Google Cloud Console &rarr; Credentials</a>.</li>
+          <li>Click <strong>Create Credentials</strong> &rarr; <strong>OAuth client ID</strong> (Web application).</li>
+          <li>Paste the Redirect URI above and add the Client ID &amp; Secret to <code>.env</code>.</li>
+        </ol>
+      </div>
+
+      <!-- Instant Fallback While Setting Up -->
+      <div class="auth-divider mb-3">
+        <span>or sign in immediately with your email</span>
+      </div>
+
       <form method="post" action="{% url 'google_login' %}">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next_url }}">
-        <input type="hidden" name="google_email" value="student.campus@gmail.com">
-        <input type="hidden" name="google_name" value="Campus Student">
-        
-        <button type="submit" class="btn btn-white w-100 text-start d-flex align-items-center gap-3 p-2 bg-white border rounded-2 shadow-sm">
-          <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width: 36px; height: 36px; background: #2563EB;">
-            S
-          </div>
-          <div class="flex-grow-1">
-            <div class="fw-bold small text-dark">Campus Student</div>
-            <div class="small text-muted" style="font-size: 0.78rem;">student.campus@gmail.com</div>
-          </div>
-          <i class="fa fa-arrow-right text-muted small"></i>
+
+        <div class="mb-3">
+          <label class="field-label" for="googleNameInput">Your Name</label>
+          <input type="text" name="google_name" id="googleNameInput" class="clean-input" placeholder="e.g. Martha Wanjiku" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="field-label" for="googleEmailInput">Your Google / Campus Email</label>
+          <input type="email" name="google_email" id="googleEmailInput" class="clean-input" placeholder="name@gmail.com or student@uonbi.ac.ke" required>
+        </div>
+
+        <button type="submit" class="btn-primary-dark w-100 justify-content-center py-2" style="background: #2563EB; border-color: #2563EB;">
+          <i class="fa fa-arrow-right me-2"></i>Continue to EventHub
         </button>
       </form>
-    </div>
-
-    <div class="auth-divider mb-3">
-      <span>or enter another Google email</span>
-    </div>
-
-    <!-- Manual Google Email Form -->
-    <form method="post" action="{% url 'google_login' %}">
-      {% csrf_token %}
-      <input type="hidden" name="next" value="{{ next_url }}">
-
-      <div class="mb-3">
-        <label class="field-label" for="googleNameInput">Your Name</label>
-        <input type="text" name="google_name" id="googleNameInput" class="clean-input" placeholder="e.g. Martha Wanjiku" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="field-label" for="googleEmailInput">Google / Campus Email</label>
-        <input type="email" name="google_email" id="googleEmailInput" class="clean-input" placeholder="name@gmail.com or student@uonbi.ac.ke" required>
-      </div>
-
-      <button type="submit" class="btn-primary-dark w-100 justify-content-center py-2" style="background: #2563EB; border-color: #2563EB;">
-        <i class="fa fa-check-circle me-2"></i>Continue to EventHub
-      </button>
-    </form>
+    {% endif %}
 
     <div class="text-center mt-3 pt-3 border-top small text-muted">
       <a href="{{ next_url }}" class="text-muted text-decoration-none">&larr; Back to event</a>
