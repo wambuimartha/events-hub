@@ -16,15 +16,6 @@
       <p class="auth-panel-sub mb-0">Join thousands of students securing passes and hackathon spots.</p>
     </div>
 
-    <!-- Google OAuth sign-in commented out for now
-    <a href="{% url 'google_login' %}?next={{ next_url|default:'' }}" class="btn-google-auth w-100 mb-3">
-      <span>Continue with Google</span>
-    </a>
-    <div class="auth-divider mb-3">
-      <span>or create an account with email</span>
-    </div>
-    -->
-
     <form method="post">
       {% csrf_token %}
 

@@ -13,15 +13,6 @@
     <h2 class="auth-panel-heading">Sign in</h2>
     <p class="auth-panel-sub">Access your registered passes and reservations.</p>
 
-    <!-- Google sign-in commented out
-    <a href="{% url 'google_login' %}?next={{ request.GET.next|default:'' }}" class="btn-google-auth w-100 mb-3">
-      <span>Continue with Google</span>
-    </a>
-    <div class="auth-divider mb-3">
-      <span>or sign in with password</span>
-    </div>
-    -->
-
     <form method="post">
       {% csrf_token %}
       {% for field in form %}
