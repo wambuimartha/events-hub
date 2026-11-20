@@ -43,49 +43,47 @@ def _send_ticket_email_worker(booking_id, recipient):
         )
         email.attach_alternative(html_content, "text/html")
 
-        # 1. Attach Official Brand Logo Inline (cid:brand_logo)
+        # Attachments
+        logo_bytes = None
         logo_path = settings.BASE_DIR / 'static' / 'images' / 'email_logo.png'
         if not logo_path.exists():
             logo_path = settings.BASE_DIR / 'static' / 'images' / 'logo.png'
-
         if logo_path.exists():
             try:
                 with open(logo_path, 'rb') as f:
                     logo_bytes = f.read()
-                logo_mime = MIMEImage(logo_bytes, _subtype='png')
-                logo_mime.add_header('Content-ID', '<brand_logo>')
-                logo_mime.add_header('Content-Disposition', 'inline', filename='eventhub_logo.png')
-                email.attach(logo_mime)
-            except Exception as e:
-                logger.warning(f"Could not attach inline logo: {e}")
+            except Exception:
+                pass
 
-        # 2. Generate QR Code Pass and attach Inline (cid:ticket_qr)
+        qr_bytes = None
         try:
-            site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
+            site_url = getattr(settings, 'SITE_URL', 'https://events-hub-rygr.onrender.com').rstrip('/')
             checkin_url = f"{site_url}/bookings/tickets/{booking.code}/check-in/"
-
             qr = qrcode.QRCode(box_size=8, border=2)
             qr.add_data(checkin_url)
             qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
-
             buf = io.BytesIO()
             img.save(buf, format='PNG')
             qr_bytes = buf.getvalue()
-
-            qr_mime = MIMEImage(qr_bytes, _subtype='png')
-            qr_mime.add_header('Content-ID', '<ticket_qr>')
-            qr_mime.add_header('Content-Disposition', 'inline', filename=f"ticket-pass-{str(booking.code)[:8]}.png")
-            email.attach(qr_mime)
         except Exception as qr_err:
             logger.error(f"Failed to generate QR attachment for booking {booking.id}: {qr_err}")
 
-        email.send(fail_silently=False)
-        print(f"[EMAIL SUCCESS] Ticket pass emailed to {recipient} for booking {booking.id}", flush=True)
-        logger.info(f"Ticket confirmation email sent to {recipient} for booking {booking.id}")
+        from config.mailer import dispatch_email
+        success = dispatch_email(
+            subject=subject,
+            recipient=recipient,
+            html_content=html_content,
+            qr_bytes=qr_bytes,
+            logo_bytes=logo_bytes
+        )
+        if success:
+            logger.info(f"Ticket confirmation email sent to {recipient} for booking {booking.id}")
+        else:
+            logger.warning(f"Ticket email could not be sent to {recipient} for booking {booking.id}")
     except Exception as e:
-        print(f"[EMAIL ERROR] Failed to send ticket pass to {recipient}: {e}", flush=True)
-        logger.error(f"Failed to dispatch ticket confirmation email for booking {booking_id}: {e}")
+        print(f"[EMAIL WORKER ERROR] {e}", flush=True)
+        logger.error(f"Failed to dispatch ticket confirmation email for booking {booking_id}: {e}", exc_info=True)
 
 
 def send_ticket_confirmation_email(booking):

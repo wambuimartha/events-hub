@@ -176,3 +176,7 @@ elif '@' not in _cleaned_from:
     DEFAULT_FROM_EMAIL = f"{_cleaned_from} <wammarz15@gmail.com>"
 else:
     DEFAULT_FROM_EMAIL = _cleaned_from
+
+# HTTPS Email Providers (Bypasses Render Free Tier SMTP port blocking)
+BREVO_API_KEY = config('BREVO_API_KEY', default='')
+RESEND_API_KEY = config('RESEND_API_KEY', default='')

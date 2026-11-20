@@ -27,35 +27,31 @@ def _send_welcome_worker(user_id, recipient):
         html_content = render_to_string('emails/welcome.html', context)
         text_content = strip_tags(html_content)
 
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient],
-        )
-        email.attach_alternative(html_content, "text/html")
-
-        # Attach logo inline
+        # Attach logo
+        logo_bytes = None
         logo_path = settings.BASE_DIR / 'static' / 'images' / 'email_logo.png'
         if not logo_path.exists():
             logo_path = settings.BASE_DIR / 'static' / 'images' / 'logo.png'
-
         if logo_path.exists():
             try:
                 with open(logo_path, 'rb') as f:
                     logo_bytes = f.read()
-                logo_mime = MIMEImage(logo_bytes, _subtype='png')
-                logo_mime.add_header('Content-ID', '<brand_logo>')
-                logo_mime.add_header('Content-Disposition', 'inline', filename='eventhub_logo.png')
-                email.attach(logo_mime)
-            except Exception as e:
-                logger.warning(f"Could not attach inline logo in welcome email: {e}")
+            except Exception:
+                pass
 
-        email.send(fail_silently=False)
-        print(f"[WELCOME EMAIL SUCCESS] Sent to {recipient} (User {user_id})", flush=True)
-        logger.info(f"Welcome email successfully sent to {recipient} (User {user_id})")
+        from config.mailer import dispatch_email
+        success = dispatch_email(
+            subject=subject,
+            recipient=recipient,
+            html_content=html_content,
+            logo_bytes=logo_bytes
+        )
+        if success:
+            logger.info(f"Welcome email successfully sent to {recipient} (User {user_id})")
+        else:
+            logger.warning(f"Welcome email could not be sent to {recipient} (User {user_id})")
     except Exception as e:
-        print(f"[WELCOME EMAIL ERROR] Failed to send welcome email to {recipient}: {e}", flush=True)
+        print(f"[WELCOME EMAIL WORKER ERROR] Failed to send welcome email to {recipient}: {e}", flush=True)
         logger.error(f"[EMAIL ERROR] Failed to send welcome email to {recipient}: {e}", exc_info=True)
 
 
