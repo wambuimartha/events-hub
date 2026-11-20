@@ -1,8 +1,13 @@
 import sys
 from copy import copy
-import pymysql
 
-pymysql.install_as_MySQLdb()
+# PyMySQL compatibility shim — only needed when using MySQL/MariaDB backend.
+# Wrapped in try/except so SQLite-only environments (e.g. Render free tier) are unaffected.
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    pass
 
 # Python 3.14+ compatibility patch for Django Context copying
 if sys.version_info >= (3, 14):
