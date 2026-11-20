@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-eventshub-campus-secret-key-2026-prod-fallback')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -143,6 +143,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_MANIFEST_STRICT = False
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -165,8 +166,12 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=5, cast=int)
-_raw_from = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>')
+_raw_from = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>').strip()
+if not _raw_from:
+    _raw_from = 'EventHub Campus <noreply@eventhub.co.ke>'
 if '@' not in _raw_from and EMAIL_HOST_USER:
     DEFAULT_FROM_EMAIL = f"{_raw_from.strip('\"')} <{EMAIL_HOST_USER}>"
+elif '@' not in _raw_from:
+    DEFAULT_FROM_EMAIL = f"{_raw_from.strip('\"')} <noreply@eventhub.co.ke>"
 else:
     DEFAULT_FROM_EMAIL = _raw_from

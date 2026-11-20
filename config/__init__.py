@@ -6,7 +6,7 @@ from copy import copy
 try:
     import pymysql
     pymysql.install_as_MySQLdb()
-except ImportError:
+except Exception:
     pass
 
 # Python 3.14+ compatibility patch for Django Context copying
