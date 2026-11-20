@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to EventHub Campus</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F3F4F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A;">
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; padding: 32px 12px;">
+    <tr>
+      <td align="center">
+
+        <!-- Main Card Container -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 560px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E5E7EB; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
+
+          <!-- Brand Top Stripe -->
+          <tr>
+            <td style="padding: 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="height: 5px; line-height: 5px; font-size: 5px;">
+                <tr>
+                  <td style="width: 70%; background-color: #E11D48; height: 5px;"></td>
+                  <td style="width: 30%; background-color: #F59E0B; height: 5px;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Official Logo Header -->
+          <tr>
+            <td style="padding: 28px 24px 16px 24px; text-align: center;">
+              <img src="cid:brand_logo" 
+                   width="170" 
+                   alt="EventHub Campus Edition" 
+                   style="display: block; margin: 0 auto; max-width: 170px; height: auto; border: 0;">
+              <div style="margin-top: 12px;">
+                <span style="display: inline-block; background-color: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 4px 14px; border-radius: 9999px;">
+                  &#10003; Student Account Created
+                </span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Main Greeting -->
+          <tr>
+            <td style="padding: 0 28px 20px 28px;">
+              <div style="font-size: 20px; font-weight: 900; color: #0F172A; margin-bottom: 8px;">
+                Welcome to the Campus Community, {{ user.first_name|default:user.username }}! &#127891;
+              </div>
+              <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
+                Your <strong>EventHub Campus</strong> account is officially active. You can now discover hackathons, freshers' bashes, sports derbies, and gala nights, book your passes in seconds, and enter via instant digital QR codes.
+              </p>
+
+              <!-- Profile Details Card -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 18px 20px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
+                      Your Student Profile Credentials
+                    </div>
+
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px;">
+                      <tr>
+                        <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Full Name:</td>
+                        <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right;">{{ user.get_full_name|default:user.username }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Email:</td>
+                        <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right;">{{ user.email }}</td>
+                      </tr>
+                      {% if phone %}
+                      <tr>
+                        <td style="padding: 6px 0; color: #64748B; font-weight: 600;">M-Pesa Phone:</td>
+                        <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right; font-family: monospace;">+254 {{ phone }}</td>
+                      </tr>
+                      {% endif %}
+                      <tr>
+                        <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Username:</td>
+                        <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right; font-family: monospace;">{{ user.username }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Highlights Grid -->
+              <div style="margin-bottom: 24px;">
+                <div style="font-size: 13px; font-weight: 800; color: #0F172A; margin-bottom: 10px;">
+                  What you can do next:
+                </div>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px; color: #475569; line-height: 1.6;">
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top; width: 24px;">&#127915;</td>
+                    <td style="padding: 6px 0;"><strong>Claim Free Passes:</strong> Instant verification with zero checkout steps.</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top;">&#128241;</td>
+                    <td style="padding: 6px 0;"><strong>Lipa na M-Pesa:</strong> Seamless STK push directly to your phone.</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top;">&#9989;</td>
+                    <td style="padding: 6px 0;"><strong>Digital QR Wallet:</strong> Stored under "My Tickets" for gate entry.</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Browse Events CTA -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ site_url }}/" 
+                       target="_blank" 
+                       style="display: inline-block; background-color: #E11D48; color: #FFFFFF; font-size: 14px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 8px; box-shadow: 0 3px 10px rgba(225, 29, 72, 0.28);">
+                      Explore Campus Events &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Help info -->
+              <p style="font-size: 12px; color: #64748B; text-align: center; margin: 0; line-height: 1.6;">
+                Need help or have questions? Reach out via WhatsApp or call <strong style="color: #0F172A;">+254 707 991 991</strong> or email <a href="mailto:info@eventhub.co.ke" style="color: #2563EB; font-weight: 600; text-decoration: underline;">info@eventhub.co.ke</a>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #0F172A; padding: 22px 24px; text-align: center; color: #94A3B8; font-size: 12px; line-height: 1.6;">
+              <strong style="color: #FFFFFF;">EventHub Campus Edition</strong> &bull; Nairobi, Kenya<br>
+              <span style="font-size: 11px; color: #64748B;">Official Student Event &amp; Ticketing Platform</span>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

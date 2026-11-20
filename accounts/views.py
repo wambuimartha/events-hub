@@ -2,11 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
 from .forms import SignUpForm
+from .email import send_welcome_email
 
 
 def signup(request):
     """
     User registration taking Full Name, Email, Phone Number, and Password.
+    Dispatches welcome confirmation email.
     """
     next_url = request.GET.get('next') or request.POST.get('next') or 'event_list'
     if request.user.is_authenticated:
@@ -17,7 +19,8 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, f"Welcome to EventHub Campus, {user.first_name or user.username}!")
+            send_welcome_email(user)
+            messages.success(request, f"Welcome to EventHub Campus, {user.first_name or user.username}! A confirmation email has been dispatched to {user.email}.")
             return redirect(next_url)
     else:
         form = SignUpForm()
