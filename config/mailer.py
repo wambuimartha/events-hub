@@ -9,18 +9,63 @@ from django.utils.html import strip_tags
 logger = logging.getLogger(__name__)
 
 
+def find_gmail_webapp_url():
+    """
+    Bulletproof auto-discovery for Google Apps Script Web App URL.
+    Scans settings, standard environment keys, and any environment variable
+    containing 'script.google.com' so no typo can ever prevent it from being found.
+    """
+    # 1. Check settings
+    val = getattr(settings, 'GMAIL_WEBAPP_URL', '')
+    if val and 'script.google.com' in str(val):
+        url = str(val).strip().strip('"').strip("'")
+        return _normalize_script_url(url)
+
+    # 2. Check standard environment variable names
+    candidates = [
+        'GMAIL_WEBAPP_URL',
+        'GMAIL_WEB_APP_URL',
+        'GMAIL_URL',
+        'WEBAPP_URL',
+        'SCRIPT_URL',
+        'GOOGLE_SCRIPT_URL',
+        'GOOGLE_APPS_SCRIPT_URL',
+        'GMAIL_SCRIPT_URL',
+    ]
+    for key in candidates:
+        v = os.environ.get(key, '').strip().strip('"').strip("'")
+        if v and 'script.google.com' in v:
+            print(f"[MAILER AUTO-DETECT] Found Web App URL in '{key}'", flush=True)
+            return _normalize_script_url(v)
+
+    # 3. Dynamic scan: check ALL environment variables for 'script.google.com'
+    for k, v in os.environ.items():
+        if 'script.google.com' in str(v):
+            cleaned = str(v).strip().strip('"').strip("'")
+            print(f"[MAILER AUTO-DETECT] Found Web App URL in env var '{k}'", flush=True)
+            return _normalize_script_url(cleaned)
+
+    return ''
+
+
+def _normalize_script_url(url):
+    """Ensure the Google Apps Script Web App URL terminates in /exec."""
+    if '/edit' in url:
+        url = url.split('/edit')[0] + '/exec'
+    elif not url.endswith('/exec'):
+        url = url.rstrip('/') + '/exec'
+    return url
+
+
 def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=None):
     """
-    Unified email dispatcher supporting:
-    1. Google Apps Script Web App (HTTPS Port 443 — 100% Free, Native Gmail)
-    2. Brevo REST API (HTTPS port 443)
-    3. Resend REST API (HTTPS port 443)
-    4. Django Standard SMTP (ports 587/465 — localhost & paid cloud tiers)
+    Unified email dispatcher:
+    1. Google Apps Script Web App (HTTPS port 443 — 100% Free, Native Gmail, zero port blocks)
+    2. Brevo HTTPS API (Port 443)
+    3. Resend HTTPS API (Port 443)
+    4. Standard Django SMTP (Port 587 — localhost/paid cloud tiers)
     """
-    gmail_webapp_url = (
-        getattr(settings, 'GMAIL_WEBAPP_URL', '') or
-        os.environ.get('GMAIL_WEBAPP_URL', '')
-    ).strip()
+    gmail_webapp_url = find_gmail_webapp_url()
     brevo_api_key = (
         getattr(settings, 'BREVO_API_KEY', '') or
         os.environ.get('BREVO_API_KEY', '')
@@ -35,17 +80,16 @@ def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=N
 
     print(
         f"[MAILER] Target: {recipient} | Subject: '{subject[:30]}...' | "
-        f"GMAIL_WEBAPP_URL: {'CONFIGURED' if gmail_webapp_url else 'NOT_SET'} | "
-        f"BREVO: {'SET' if brevo_api_key else 'NO'} | RESEND: {'SET' if resend_api_key else 'NO'}",
+        f"GMAIL_WEBAPP_URL: {'FOUND' if gmail_webapp_url else 'NOT_FOUND'}",
         flush=True
     )
 
     # =========================================================================
-    # OPTION 0: Google Apps Script Web App (HTTPS Port 443 — 100% Free, Native Gmail)
+    # OPTION 0: Google Apps Script Web App (HTTPS Port 443)
     # =========================================================================
     if gmail_webapp_url:
         try:
-            print(f"[GMAIL WEBAPP] Dispatching HTTPS request to Google Web App...", flush=True)
+            print(f"[GMAIL WEBAPP] Dispatching HTTPS POST to: {gmail_webapp_url[:50]}...", flush=True)
             payload = {
                 "to": recipient,
                 "subject": subject,
@@ -71,18 +115,19 @@ def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=N
                 gmail_webapp_url,
                 json=payload,
                 headers={"Content-Type": "application/json"},
-                timeout=25,
+                timeout=30,
                 allow_redirects=True
             )
-            print(f"[GMAIL WEBAPP RESPONSE] HTTP {resp.status_code} | Body: {resp.text[:160]}", flush=True)
+            print(f"[GMAIL WEBAPP RESPONSE] HTTP {resp.status_code} | Body: {resp.text[:180]}", flush=True)
 
+            # Check if Google returned success or redirected to execution output
             if "success" in resp.text.lower() or resp.status_code in (200, 302):
-                print(f"[GMAIL WEBAPP SUCCESS] Ticket email delivered to {recipient}", flush=True)
+                print(f"[GMAIL WEBAPP SUCCESS] Ticket admission email delivered to {recipient}", flush=True)
                 return True
             else:
-                print(f"[GMAIL WEBAPP WARNING] Unexpected response: {resp.status_code} - {resp.text[:120]}", flush=True)
+                print(f"[GMAIL WEBAPP WARNING] Unexpected response: {resp.status_code} - {resp.text[:140]}", flush=True)
         except Exception as e:
-            print(f"[GMAIL WEBAPP EXCEPTION] Error posting to Web App: {e}", flush=True)
+            print(f"[GMAIL WEBAPP EXCEPTION] Error calling Web App: {e}", flush=True)
 
     # =========================================================================
     # OPTION 1: Brevo HTTPS REST API (Port 443)
@@ -161,7 +206,6 @@ def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=N
 
     # =========================================================================
     # OPTION 3: Standard Django SMTP (Port 587)
-    # Note: Blocked on Render Free Tier; works on localhost and paid tiers.
     # =========================================================================
     try:
         from email.mime.image import MIMEImage
@@ -200,8 +244,8 @@ def dispatch_email(subject, recipient, html_content, qr_bytes=None, logo_bytes=N
         print(f"[SMTP FAILED] {err_msg}", flush=True)
         if "network is unreachable" in err_msg.lower() or "timed out" in err_msg.lower() or "101" in err_msg or "110" in err_msg:
             print(
-                "[RENDER FREE TIER LIMITATION] Render actively blocks outbound SMTP (port 587). "
-                "Ensure GMAIL_WEBAPP_URL is saved in Render Dashboard -> Environment to route through Google Apps Script over HTTPS.",
+                "[RENDER FREE TIER LIMITATION] Outbound port 587 blocked. "
+                "Set GMAIL_WEBAPP_URL in Render Dashboard -> Environment to route via Google Apps Script HTTPS.",
                 flush=True
             )
         return False
