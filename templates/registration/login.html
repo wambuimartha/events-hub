@@ -17,9 +17,16 @@
       {% csrf_token %}
       {% for field in form %}
         <div class="mb-3">
-          <label for="{{ field.id_for_label }}" class="field-label">
-            {% if field.name == 'username' %}Username or Email Address{% else %}{{ field.label }}{% endif %}
-          </label>
+          {% if field.name == 'password' %}
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="{{ field.id_for_label }}" class="field-label mb-0">Password</label>
+              <a href="{% url 'password_reset' %}" class="small text-muted text-decoration-underline" style="font-size: 0.82rem;">Forgot password?</a>
+            </div>
+          {% else %}
+            <label for="{{ field.id_for_label }}" class="field-label">
+              {% if field.name == 'username' %}Username or Email Address{% else %}{{ field.label }}{% endif %}
+            </label>
+          {% endif %}
           <input type="{{ field.field.widget.input_type }}"
                  name="{{ field.html_name }}"
                  id="{{ field.id_for_label }}"
