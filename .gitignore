@@ -3,6 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
-media/
+staticfiles/
 *.sqlite3
 .DS_Store
