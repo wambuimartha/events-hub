@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Event, TicketType
 from .forms import EventCreateForm
+from bookings.models import Booking
 
 
 def event_list(request):
@@ -88,3 +89,58 @@ def create_event(request):
         form = EventCreateForm()
 
     return render(request, 'events/event_create.html', {'form': form})
+
+
+@login_required
+def organizer_portal(request):
+    """
+    Campus Organizer & Staff Admin Portal.
+    Displays live KPI metrics, attendee registration roster,
+    ticket revenue, and event management controls.
+    """
+    if not request.user.is_staff:
+        messages.error(request, "Staff / Organizer permissions are required to access the Admin Portal.")
+        return redirect('event_list')
+
+    events = Event.objects.all().order_by('-start_time')
+
+    event_id = request.GET.get('event_id', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+    search_query = request.GET.get('q', '').strip()
+
+    bookings = Booking.objects.select_related('ticket_type__event', 'user').order_by('-created_at')
+
+    if event_id:
+        bookings = bookings.filter(ticket_type__event_id=event_id)
+    if status_filter:
+        bookings = bookings.filter(status=status_filter)
+    if search_query:
+        bookings = bookings.filter(
+            Q(attendee_name__icontains=search_query) |
+            Q(attendee_email__icontains=search_query) |
+            Q(phone_number__icontains=search_query) |
+            Q(code__icontains=search_query) |
+            Q(mpesa_receipt__icontains=search_query) |
+            Q(user__username__icontains=search_query)
+        )
+
+    # Metrics
+    total_bookings = Booking.objects.count()
+    paid_bookings = Booking.objects.filter(status='paid')
+    total_paid_count = paid_bookings.count()
+    total_revenue = paid_bookings.aggregate(total=Sum('total'))['total'] or 0
+    total_checked_in = Booking.objects.filter(checked_in=True).count()
+    total_events = Event.objects.count()
+
+    return render(request, 'events/portal.html', {
+        'events': events,
+        'bookings': bookings[:100],
+        'total_bookings': total_bookings,
+        'total_paid_count': total_paid_count,
+        'total_revenue': total_revenue,
+        'total_checked_in': total_checked_in,
+        'total_events': total_events,
+        'selected_event_id': event_id,
+        'selected_status': status_filter,
+        'search_query': search_query,
+    })

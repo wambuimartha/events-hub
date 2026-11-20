@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Admin Portal — EventHub Campus{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumbs & Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill small fw-bold" style="background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">
+        <i class="fa fa-chart-line"></i> ORGANIZER &amp; STAFF PORTAL
+      </div>
+      <h2 class="fw-bold mb-1" style="letter-spacing: -0.03em;">Event Operations &amp; Attendee Roster</h2>
+      <p class="text-secondary small mb-0">Live real-time monitoring of campus event registrations, M-Pesa payments, and gate check-ins.</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'create_event' %}" class="btn-tikiti-auth text-decoration-none" style="background: #E11D48; padding: 0.55rem 1rem;">
+        <i class="fa fa-plus me-1"></i> Upload Event
+      </a>
+      <a href="{% url 'admin:index' %}" target="_blank" class="btn btn-outline-dark btn-sm fw-bold px-3 py-2" title="Open Full Django Admin Panel">
+        <i class="fa fa-user-shield me-1 text-primary"></i> Django Admin &rarr;
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI SUMMARY STATS -->
+  <div class="row g-3 mb-4">
+    <!-- Stat 1: Total Bookings -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-bold text-uppercase">Passes Issued</span>
+          <span class="p-2 rounded-circle bg-primary-subtle text-primary"><i class="fa fa-ticket-alt"></i></span>
+        </div>
+        <div class="fs-3 fw-bold text-dark">{{ total_bookings }}</div>
+        <div class="small text-muted">{{ total_paid_count }} confirmed attendees</div>
+      </div>
+    </div>
+
+    <!-- Stat 2: Revenue -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-bold text-uppercase">Ticket Revenue</span>
+          <span class="p-2 rounded-circle bg-success-subtle text-success"><i class="fa fa-coins"></i></span>
+        </div>
+        <div class="fs-3 fw-bold text-success">KSh {{ total_revenue|floatformat:0 }}</div>
+        <div class="small text-muted">M-Pesa &amp; Daraja collections</div>
+      </div>
+    </div>
+
+    <!-- Stat 3: Gate Admissions -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-bold text-uppercase">Gate Admissions</span>
+          <span class="p-2 rounded-circle bg-info-subtle text-info"><i class="fa fa-qrcode"></i></span>
+        </div>
+        <div class="fs-3 fw-bold text-dark">{{ total_checked_in }}</div>
+        <div class="small text-muted">Scanned at entrance</div>
+      </div>
+    </div>
+
+    <!-- Stat 4: Events Hosted -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-bold text-uppercase">Campus Events</span>
+          <span class="p-2 rounded-circle bg-warning-subtle text-warning"><i class="fa fa-calendar-alt"></i></span>
+        </div>
+        <div class="fs-3 fw-bold text-dark">{{ total_events }}</div>
+        <div class="small text-muted">Active on EventHub</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS & SEARCH -->
+  <div class="p-3 bg-white rounded-3 border shadow-sm mb-4">
+    <form method="get" class="row g-2 align-items-center">
+      <!-- Search Input -->
+      <div class="col-md-4">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light text-muted"><i class="fa fa-search"></i></span>
+          <input type="text" 
+                 name="q" 
+                 class="form-control" 
+                 placeholder="Search student, email, phone, receipt..." 
+                 value="{{ search_query }}">
+        </div>
+      </div>
+
+      <!-- Event Filter -->
+      <div class="col-md-4">
+        <select name="event_id" class="form-select form-select-sm">
+          <option value="">All Campus Events</option>
+          {% for ev in events %}
+            <option value="{{ ev.id }}" {% if selected_event_id == ev.id|stringformat:"s" %}selected{% endif %}>
+              {{ ev.title|truncatechars:40 }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Payment Status Filter -->
+      <div class="col-md-2">
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All Statuses</option>
+          <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>Paid / Confirmed</option>
+          <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+        </select>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-dark btn-sm flex-grow-1 fw-bold">
+          Filter
+        </button>
+        {% if search_query or selected_event_id or selected_status %}
+          <a href="{% url 'organizer_portal' %}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
+            <i class="fa fa-times"></i>
+          </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- ATTENDEE BOOKINGS TABLE -->
+  <div class="bg-white rounded-4 border shadow-sm overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h5 class="fw-bold mb-0">Registered Attendees &amp; Passes</h5>
+        <span class="small text-muted">Showing {{ bookings|length }} booking record{{ bookings|length|pluralize }}</span>
+      </div>
+      <a href="{% url 'admin:bookings_booking_changelist' %}" target="_blank" class="small fw-semibold text-primary text-decoration-none">
+        Open in Django Admin Table &rarr;
+      </a>
+    </div>
+
+    {% if bookings %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
+          <thead class="table-light text-muted small text-uppercase">
+            <tr>
+              <th scope="col" class="ps-3">Ticket Code</th>
+              <th scope="col">Attendee &amp; Email</th>
+              <th scope="col">Phone (M-Pesa)</th>
+              <th scope="col">Event &amp; Pass Tier</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Payment State</th>
+              <th scope="col">Gate Check-in</th>
+              <th scope="col" class="text-end pe-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in bookings %}
+              <tr>
+                <!-- Code -->
+                <td class="ps-3 font-monospace fw-bold text-dark">
+                  <a href="{% url 'check_in_ticket' b.code %}" target="_blank" class="text-decoration-none" title="Open Verification Badge">
+                    #{{ b.code|stringformat:"s"|slice:":8" }}
+                  </a>
+                </td>
+
+                <!-- Attendee Info -->
+                <td>
+                  <strong class="d-block text-dark">{{ b.attendee_name|default:b.user.username }}</strong>
+                  <span class="small text-muted">{{ b.attendee_email|default:b.user.email }}</span>
+                </td>
+
+                <!-- Phone -->
+                <td>
+                  <span class="font-monospace text-dark">{{ b.phone_number|default:'—' }}</span>
+                </td>
+
+                <!-- Event & Tier -->
+                <td>
+                  <a href="{% url 'event_detail' b.ticket_type.event.id %}" class="fw-semibold text-dark text-decoration-none d-block">
+                    {{ b.ticket_type.event.title|truncatechars:28 }}
+                  </a>
+                  <span class="small text-muted">{{ b.ticket_type.name }} &times; {{ b.quantity }}</span>
+                </td>
+
+                <!-- Amount -->
+                <td class="fw-bold">
+                  {% if b.total == 0 %}
+                    <span class="text-success">FREE</span>
+                  {% else %}
+                    KSh {{ b.total|floatformat:0 }}
+                  {% endif %}
+                </td>
+
+                <!-- Status -->
+                <td>
+                  {% if b.status == 'paid' %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small">
+                      PAID ({{ b.mpesa_receipt|default:'OK' }})
+                    </span>
+                  {% elif b.status == 'pending' %}
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded-pill small">
+                      PENDING
+                    </span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill small">
+                      {{ b.status|upper }}
+                    </span>
+                  {% endif %}
+                </td>
+
+                <!-- Check-in Status -->
+                <td>
+                  {% if b.checked_in %}
+                    <span class="badge bg-success text-white small px-2 py-1">
+                      <i class="fa fa-check me-1"></i> Admitted
+                    </span>
+                  {% else %}
+                    <span class="badge bg-light text-muted border small px-2 py-1">
+                      Gate Pending
+                    </span>
+                  {% endif %}
+                </td>
+
+                <!-- Quick Actions -->
+                <td class="text-end pe-3">
+                  <a href="{% url 'check_in_ticket' b.code %}" class="btn btn-outline-dark btn-sm py-1 px-2" style="font-size: 0.78rem;" title="Check-in or view QR">
+                    <i class="fa fa-qrcode me-1"></i> Scan
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-5 text-center text-muted">
+        <i class="fa fa-inbox fs-1 mb-2 d-block"></i>
+        <h6>No bookings found matching your search.</h6>
+        <p class="small mb-0">Try clearing your filters or check back once students register.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ACTIVE EVENTS DIRECTORY -->
+  <div class="bg-white rounded-4 border shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Hosted Campus Events</h5>
+      <a href="{% url 'create_event' %}" class="btn btn-outline-dark btn-sm fw-bold">
+        <i class="fa fa-plus me-1"></i> New Event
+      </a>
+    </div>
+
+    <div class="row g-3">
+      {% for ev in events %}
+        <div class="col-md-6 col-lg-4">
+          <div class="p-3 bg-light rounded-3 border h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="small text-muted fw-bold">{{ ev.start_time|date:"D, d M · H:i" }} EAT</span>
+                <span class="badge bg-primary-subtle text-primary small">Active</span>
+              </div>
+              <h6 class="fw-bold text-dark mb-1">{{ ev.title }}</h6>
+              <div class="small text-secondary mb-3">
+                <i class="fa fa-map-marker-alt text-danger me-1"></i> {{ ev.venue|truncatechars:35 }}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 pt-2 border-top">
+              <a href="{% url 'event_detail' ev.id %}" class="btn btn-white btn-sm border flex-grow-1 text-center fw-semibold">
+                View Event Page
+              </a>
+              <a href="{% url 'organizer_portal' %}?event_id={{ ev.id }}" class="btn btn-dark btn-sm flex-grow-1 text-center fw-semibold">
+                Roster
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
