@@ -169,9 +169,10 @@ EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=5, cast=int)
 _raw_from = config('DEFAULT_FROM_EMAIL', default='EventHub Campus <noreply@eventhub.co.ke>').strip()
 if not _raw_from:
     _raw_from = 'EventHub Campus <noreply@eventhub.co.ke>'
-if '@' not in _raw_from and EMAIL_HOST_USER:
-    DEFAULT_FROM_EMAIL = f"{_raw_from.strip('\"')} <{EMAIL_HOST_USER}>"
-elif '@' not in _raw_from:
-    DEFAULT_FROM_EMAIL = f"{_raw_from.strip('\"')} <noreply@eventhub.co.ke>"
+_cleaned_from = _raw_from.strip('"').strip("'")
+if '@' not in _cleaned_from and EMAIL_HOST_USER:
+    DEFAULT_FROM_EMAIL = f"{_cleaned_from} <{EMAIL_HOST_USER}>"
+elif '@' not in _cleaned_from:
+    DEFAULT_FROM_EMAIL = f"{_cleaned_from} <noreply@eventhub.co.ke>"
 else:
-    DEFAULT_FROM_EMAIL = _raw_from
+    DEFAULT_FROM_EMAIL = _cleaned_from
