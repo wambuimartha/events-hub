@@ -10,11 +10,13 @@ logger = logging.getLogger(__name__)
 
 # Safaricom Daraja Configuration (defaulted to standard Safaricom Sandbox credentials)
 MPESA_ENVIRONMENT = config('MPESA_ENVIRONMENT', default='sandbox').lower()
-MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY', default='UUdH9YiP77Zi2gDc26KAAwsbcoVhkjs4ASfkTPch2ZVofUSV')
-MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET', default='0doAcCJk7TpElz8n3M0WqGCtf6eeOz66TmN8ACy8k4BK5GUkinNjAsm7ZnUWKcFY')
+MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY', default='wQe8WBnXiP8kK4NTqfTCTbeqwCpDHNZkRjoQBBVMABf8u3oq')
+MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET', default='8uUArjjA3OLiZtHIjdWHWaAmFlvmi3tCWafAsoYG9qWiizXrY7iht6weuwlo4y1G')
 MPESA_SHORTCODE = config('MPESA_SHORTCODE', default='174379')
 MPESA_PASSKEY = config('MPESA_PASSKEY', default='bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919')
-MPESA_CALLBACK_URL = config('MPESA_CALLBACK_URL', default='https://example.com/bookings/mpesa/callback/')
+
+DEFAULT_SITE_URL = config('SITE_URL', default='https://events-hub-rygr.onrender.com').rstrip('/')
+MPESA_CALLBACK_URL = config('MPESA_CALLBACK_URL', default=f"{DEFAULT_SITE_URL}/bookings/mpesa/callback/")
 
 if MPESA_ENVIRONMENT == 'production':
     BASE_URL = 'https://api.safaricom.co.ke'
